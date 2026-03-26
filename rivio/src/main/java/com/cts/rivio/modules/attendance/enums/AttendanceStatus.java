@@ -1,4 +1,8 @@
 package com.cts.rivio.modules.attendance.enums;
 
-public class AttendanceStatus {
+public enum AttendanceStatus {
+    Present,
+    Absent,
+    Leave,
+    Holiday
 }
