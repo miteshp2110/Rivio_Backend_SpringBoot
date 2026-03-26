@@ -1,27 +1,40 @@
 package com.cts.rivio.modules.auth.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "roles")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Table(name = "role_permissions")
+@IdClass(RolePermissionId.class)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class Role {
+public class RolePermission {
+
+    /*
+     * Mapped as Integer for now. Once relationships are fully established,
+     * this is typically mapped as:
+     * @Id
+     * @ManyToOne(fetch = FetchType.LAZY)
+     * @JoinColumn(name = "role_id", nullable = false)
+     * private Role role;
+     */
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "role_id", nullable = false)
+    private Integer roleId;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String name;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "role_permissions", // The join table name from your SQL
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
-    private Set<Permission> permissions;
+    /*
+     * Mapped as Integer for now.
+     * @Id
+     * @ManyToOne(fetch = FetchType.LAZY)
+     * @JoinColumn(name = "permission_id", nullable = false)
+     * private Permission permission;
+     */
+    @Id
+    @Column(name = "permission_id", nullable = false)
+    private Integer permissionId;
 }

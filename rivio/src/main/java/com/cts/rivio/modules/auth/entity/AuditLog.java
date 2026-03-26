@@ -1,5 +1,6 @@
 package com.cts.rivio.modules.auth.entity;
 
+import com.cts.rivio.modules.auth.enums.AuditAction;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -36,8 +37,4 @@ public class AuditLog {
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
-}
-
-enum AuditAction {
-    INSERT, UPDATE, DELETE
 }

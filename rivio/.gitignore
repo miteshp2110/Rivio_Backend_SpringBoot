@@ -33,5 +33,7 @@ build/
 ### VS Code ###
 .vscode/
 
+/.claude
+
 application.properties
 
