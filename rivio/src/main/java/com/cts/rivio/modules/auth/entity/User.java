@@ -28,14 +28,9 @@ public class User {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    /*
-     * Mapped as Integer for now. Once you create the Role entity, you can change this to:
-     * * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "role_id", nullable = false)
-     * private Role role;
-     */
-    @Column(name = "role_id", nullable = false)
-    private Integer roleId;
+    @ManyToOne(fetch = FetchType.EAGER) // Eager is usually better for Roles during authentication
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

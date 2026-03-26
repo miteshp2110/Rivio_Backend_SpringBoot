@@ -1,6 +1,8 @@
 package com.cts.rivio.modules.attendance.entity;
 
 import com.cts.rivio.modules.attendance.enums.AttendanceStatus;
+import com.cts.rivio.modules.auth.entity.User;
+import com.cts.rivio.modules.employee.entity.EmployeeProfile;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,14 +34,9 @@ public class Attendance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /* * NOTE: Mapped as a basic column for now.
-     * Once you create the EmployeeProfile entity, you can change this to:
-     * * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "employee_profile_id", nullable = false)
-     * private EmployeeProfile employeeProfile;
-     */
-    @Column(name = "employee_profile_id", nullable = false)
-    private Integer employeeProfileId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_profile_id", nullable = false)
+    private EmployeeProfile employeeProfile;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
@@ -55,15 +52,9 @@ public class Attendance {
     @Builder.Default
     private AttendanceStatus status = AttendanceStatus.Present;
 
-    /*
-     * NOTE: Mapped as a basic column for now.
-     * Once you create the User entity, you can change this to:
-     * * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "created_by_user_id")
-     * private User createdByUser;
-     */
-    @Column(name = "created_by_user_id")
-    private Integer createdByUserId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private User createdByUser;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

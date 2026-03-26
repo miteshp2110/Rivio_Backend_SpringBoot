@@ -1,6 +1,8 @@
 package com.cts.rivio.modules.ats.entity;
 
 import com.cts.rivio.modules.ats.enums.JobStatus;
+import com.cts.rivio.modules.company.entity.Department;
+import com.cts.rivio.modules.company.entity.Location;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -21,11 +23,13 @@ public class JobOpening {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "department_id", nullable = false)
-    private Integer departmentId; // Links to Module 2
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
 
-    @Column(name = "location_id", nullable = false)
-    private Integer locationId; // Links to Module 2
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

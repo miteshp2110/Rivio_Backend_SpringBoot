@@ -15,26 +15,13 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RolePermission {
 
-    /*
-     * Mapped as Integer for now. Once relationships are fully established,
-     * this is typically mapped as:
-     * @Id
-     * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "role_id", nullable = false)
-     * private Role role;
-     */
     @Id
-    @Column(name = "role_id", nullable = false)
-    private Integer roleId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
-    /*
-     * Mapped as Integer for now.
-     * @Id
-     * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "permission_id", nullable = false)
-     * private Permission permission;
-     */
     @Id
-    @Column(name = "permission_id", nullable = false)
-    private Integer permissionId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "permission_id", nullable = false)
+    private Permission permission;
 }

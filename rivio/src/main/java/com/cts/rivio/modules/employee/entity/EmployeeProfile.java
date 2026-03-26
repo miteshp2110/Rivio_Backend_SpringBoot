@@ -1,5 +1,9 @@
 package com.cts.rivio.modules.employee.entity;
 
+import com.cts.rivio.modules.auth.entity.User;
+import com.cts.rivio.modules.company.entity.Department;
+import com.cts.rivio.modules.company.entity.Designation;
+import com.cts.rivio.modules.company.entity.Location;
 import com.cts.rivio.modules.employee.enums.EmployeeStatus;
 import com.cts.rivio.modules.employee.enums.EmploymentType;
 import jakarta.persistence.*;
@@ -22,14 +26,10 @@ public class EmployeeProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /*
-     * Mapped as Integer for now. To link to User entity later:
-     * @OneToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "user_id", nullable = false, unique = true)
-     * private User user;
-     */
-    @Column(name = "user_id", nullable = false, unique = true)
-    private Integer userId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     @Column(name = "employee_code", nullable = false, unique = true, length = 50)
     private String employeeCode;
@@ -46,38 +46,21 @@ public class EmployeeProfile {
     @Column(name = "phone_no", length = 12)
     private String phoneNo;
 
-    /*
-     * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "location_id", nullable = false)
-     * private Location location;
-     */
-    @Column(name = "location_id", nullable = false)
-    private Integer locationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
 
-    /*
-     * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "department_id", nullable = false)
-     * private Department department;
-     */
-    @Column(name = "department_id", nullable = false)
-    private Integer departmentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
 
-    /*
-     * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "designation_id", nullable = false)
-     * private Designation designation;
-     */
-    @Column(name = "designation_id", nullable = false)
-    private Integer designationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "designation_id", nullable = false)
+    private Designation designation;
 
-    /*
-     * Self-referencing relationship for managers:
-     * @ManyToOne(fetch = FetchType.LAZY)
-     * @JoinColumn(name = "reports_to_profile_id")
-     * private EmployeeProfile manager;
-     */
-    @Column(name = "reports_to_profile_id")
-    private Integer reportsToProfileId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reports_to_profile_id")
+    private EmployeeProfile manager;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "employment_type")
