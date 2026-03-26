@@ -1,4 +1,5 @@
 package com.cts.rivio.modules.leave.entity;
+import com.cts.rivio.modules.employee.entity.EmployeeProfile;
 import com.cts.rivio.modules.leave.enums.LeaveStatus;
 import jakarta.persistence.*;
 import lombok.*;

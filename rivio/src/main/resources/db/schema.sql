@@ -108,7 +108,8 @@ CREATE TABLE leave_requests (
 CREATE TABLE salary_components (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL COMMENT 'e.g., Basic, HRA, Provident Fund, TDS',
-    value VARCHAR(12) NOT NULL
+    type ENUM('EARNING', 'DEDUCTION') NOT NULL,
+    value DECIMAL(10,2) NOT NULL
 );
 
 CREATE TABLE pay_cycles (

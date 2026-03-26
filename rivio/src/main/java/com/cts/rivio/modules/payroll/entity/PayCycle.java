@@ -25,7 +25,7 @@ public class PayCycle {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private PayCycleStatus status;
+    private PayCycleStatus status = PayCycleStatus.DRAFT;
 }
 
 

@@ -1,5 +1,6 @@
 package com.cts.rivio.modules.leave.entity;
 
+import com.cts.rivio.modules.employee.entity.EmployeeProfile;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Formula;
