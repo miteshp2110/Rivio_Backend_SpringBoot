@@ -2,6 +2,9 @@
 -- 1. CREATE TABLES (Without Foreign Keys)
 -- ==========================================
 
+create database rivio;
+use rivio
+
 CREATE TABLE permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     module VARCHAR(50) NOT NULL COMMENT 'e.g., Payroll, Leave, ATS',

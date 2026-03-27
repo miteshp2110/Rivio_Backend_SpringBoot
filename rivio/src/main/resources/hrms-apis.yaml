@@ -1,0 +1,731 @@
+openapi: 3.0.0
+info:
+  title: Rivio HRMS Master API Collection
+  description: Complete Backend API for Rivio HRMS mapped to Agile User Stories (AUTH-01 to PAY-45). Includes full CRUD and workflow operations.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8081
+    description: Local Dev Environment
+
+tags:
+  - name: 1. Auth & Authorization
+  - name: 2. Company Structure
+  - name: 3. Employee Management
+  - name: 4. Leave Management
+  - name: 5. Attendance Management
+  - name: 6. Applicant Tracking (ATS)
+  - name: 7. Payroll Management
+
+paths:
+  # ==========================================
+  # 1. AUTH & AUTHORIZATION
+  # ==========================================
+  /api/auth/login:
+    post:
+      tags: [1. Auth & Authorization]
+      summary: "[AUTH-01] Employee Login"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: JWT and Permissions returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/roles:
+    get:
+      tags: [1. Auth & Authorization]
+      summary: "[AUTH-03] List all roles"
+      responses:
+        '200':
+          description: Array of roles
+    post:
+      tags: [1. Auth & Authorization]
+      summary: "[AUTH-02] Create a new role"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/roles/{id}/permissions:
+    post:
+      tags: [1. Auth & Authorization]
+      summary: "[AUTH-04] Bind Role to Permissions"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items: { type: integer }
+              example: [1, 2, 5, 8]
+      responses:
+        '200':
+          description: Permissions updated
+
+  /api/users:
+    post:
+      tags: [1. Auth & Authorization]
+      summary: "[AUTH-05] Create User Account"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: User Created
+
+  /api/users/{id}/reset-password:
+    post:
+      tags: [1. Auth & Authorization]
+      summary: "[AUTH-06] Reset Employee Password"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newPassword: { type: string, example: "NewSecurePass123!" }
+      responses:
+        '200':
+          description: Password reset successful
+
+  /api/audit-logs:
+    get:
+      tags: [1. Auth & Authorization]
+      summary: "[AUTH-07] View System Audit Logs"
+      responses:
+        '200':
+          description: Paginated logs
+
+  # ==========================================
+  # 2. COMPANY STRUCTURE
+  # ==========================================
+  /api/locations:
+    get:
+      tags: [2. Company Structure]
+      summary: "[COMP-09] List Locations"
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [2. Company Structure]
+      summary: "[COMP-08] Create Location"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/departments:
+    get:
+      tags: [2. Company Structure]
+      summary: "[COMP-11] List Departments"
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [2. Company Structure]
+      summary: "[COMP-10] Create Department"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/designations:
+    post:
+      tags: [2. Company Structure]
+      summary: "[COMP-12] Create Designation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesignationRequest'
+      responses:
+        '201':
+          description: Created
+
+  # ==========================================
+  # 3. EMPLOYEE MANAGEMENT
+  # ==========================================
+  /api/employees:
+    get:
+      tags: [3. Employee Management]
+      summary: "[EMP-16] List Employee Directory"
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Paginated employees
+    post:
+      tags: [3. Employee Management]
+      summary: "[EMP-14] Onboard New Employee"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeProfileRequest'
+      responses:
+        '201':
+          description: Profile Created
+
+  /api/employees/{id}:
+    get:
+      tags: [3. Employee Management]
+      summary: "[EMP-15] View Employee Profile"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Profile details
+
+  /api/employees/{id}/job-details:
+    put:
+      tags: [3. Employee Management]
+      summary: "[EMP-17] Update Job Details (Promotion/Transfer)"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                departmentId: { type: integer }
+                designationId: { type: integer }
+                locationId: { type: integer }
+                reportsToProfileId: { type: integer }
+      responses:
+        '200':
+          description: Updated
+
+  /api/employees/{id}/status:
+    put:
+      tags: [3. Employee Management]
+      summary: "[EMP-18] Manage Employee Status (Offboard)"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, example: "Terminated" }
+                exitDate: { type: string, format: date, example: "2026-05-01" }
+      responses:
+        '200':
+          description: Updated
+
+  # ==========================================
+  # 4. LEAVE MANAGEMENT
+  # ==========================================
+  /api/leave-types:
+    post:
+      tags: [4. Leave Management]
+      summary: "[LEAV-19] Create Leave Type"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeaveTypeRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/leave-balances/allocate:
+    post:
+      tags: [4. Leave Management]
+      summary: "[LEAV-21] Allocate Leave Balances"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                year: { type: integer, example: 2026 }
+      responses:
+        '200':
+          description: Batch allocation complete
+
+  /api/employees/{id}/leave-balances:
+    get:
+      tags: [4. Leave Management]
+      summary: "[LEAV-22] View Personal Leave Balance"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+
+  /api/leave-requests:
+    post:
+      tags: [4. Leave Management]
+      summary: "[LEAV-23] Apply for Leave"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeaveRequestPayload'
+      responses:
+        '201':
+          description: Request submitted
+
+  /api/leave-requests/pending:
+    get:
+      tags: [4. Leave Management]
+      summary: "[LEAV-24] View Team Leave Requests"
+      responses:
+        '200':
+          description: List of pending requests for logged-in manager
+
+  /api/leave-requests/{id}/status:
+    put:
+      tags: [4. Leave Management]
+      summary: "[LEAV-25] Approve/Reject Leave"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, example: "Approved" }
+      responses:
+        '200':
+          description: Status Updated
+
+  # ==========================================
+  # 5. ATTENDANCE MANAGEMENT
+  # ==========================================
+  /api/holidays:
+    post:
+      tags: [5. Attendance Management]
+      summary: "[ATTN-26] Add Holiday"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, example: "Diwali" }
+                date: { type: string, format: date, example: "2026-11-08" }
+      responses:
+        '201':
+          description: Created
+
+  /api/work-days/{id}:
+    put:
+      tags: [5. Attendance Management]
+      summary: "[ATTN-28] Configure Work Days"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isWorkingDay: { type: boolean, example: false }
+      responses:
+        '200':
+          description: Updated
+
+  /api/attendance/upload:
+    post:
+      tags: [5. Attendance Management]
+      summary: "[ATTN-29] Bulk Upload Attendance (Excel/CSV)"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Processed
+
+  /api/attendance:
+    get:
+      tags: [5. Attendance Management]
+      summary: "[ATTN-33] View Organization Attendance"
+      parameters:
+        - in: query
+          name: date
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [5. Attendance Management]
+      summary: "[ATTN-30] Mark Single Employee Attendance"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceRequest'
+      responses:
+        '201':
+          description: Logged
+
+  /api/attendance/{id}/punch-out:
+    patch:
+      tags: [5. Attendance Management]
+      summary: "[ATTN-31] Update Missing Punch-Out"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                punchOut: { type: string, format: date-time, example: "2026-03-27T18:30:00" }
+      responses:
+        '200':
+          description: Updated
+
+  # ==========================================
+  # 6. APPLICANT TRACKING (ATS)
+  # ==========================================
+  /api/job-openings:
+    post:
+      tags: [6. Applicant Tracking (ATS)]
+      summary: "[ATS-34] Create Job Opening"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobOpeningRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/job-openings/{id}/candidates:
+    get:
+      tags: [6. Applicant Tracking (ATS)]
+      summary: "[ATS-37] View Candidates"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [6. Applicant Tracking (ATS)]
+      summary: "[ATS-36] Add Candidate"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CandidateRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/candidates/{id}/stage:
+    put:
+      tags: [6. Applicant Tracking (ATS)]
+      summary: "[ATS-38] Update Candidate Stage"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stage: { type: string, example: "INTERVIEWING" }
+      responses:
+        '200':
+          description: OK
+
+  /api/candidates/{id}/hire:
+    post:
+      tags: [6. Applicant Tracking (ATS)]
+      summary: "[ATS-39] Convert Candidate to Employee"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Conversion triggered
+
+  # ==========================================
+  # 7. PAYROLL MANAGEMENT
+  # ==========================================
+  /api/salary-components:
+    post:
+      tags: [7. Payroll Management]
+      summary: "[PAY-40] Create Salary Component"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SalaryComponentRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/pay-cycles:
+    post:
+      tags: [7. Payroll Management]
+      summary: "[PAY-42] Create Pay Cycle"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayCycleRequest'
+      responses:
+        '201':
+          description: Created
+
+  /api/pay-cycles/{id}/status:
+    put:
+      tags: [7. Payroll Management]
+      summary: "[PAY-43] Update Pay Cycle Status"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, example: "PROCESSING" }
+      responses:
+        '200':
+          description: OK
+
+  /api/pay-cycles/{id}/generate-payslips:
+    post:
+      tags: [7. Payroll Management]
+      summary: "[PAY-44] Initiate Payslip Generation"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Payslips Generated
+
+  /api/employees/{id}/payslips:
+    get:
+      tags: [7. Payroll Management]
+      summary: "[PAY-45] View Payslips"
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: List of Payslips
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email: { type: string, example: "admin@rivio.com" }
+        password: { type: string, example: "securePass123" }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string, example: "eyJhbGciOiJIUz..." }
+        permissions:
+          type: array
+          items: { type: string }
+          example: ["CREATE_USER", "APPROVE_LEAVE"]
+
+    RoleRequest:
+      type: object
+      properties:
+        name: { type: string, example: "HR_ADMIN" }
+
+    UserRequest:
+      type: object
+      properties:
+        email: { type: string, example: "new.hire@rivio.com" }
+        password: { type: string, example: "TempPass1!" }
+        roleId: { type: integer, example: 2 }
+
+    LocationRequest:
+      type: object
+      properties:
+        name: { type: string, example: "Chennai HQ" }
+        currencyCode: { type: string, example: "INR" }
+        timezone: { type: string, example: "Asia/Kolkata" }
+
+    DepartmentRequest:
+      type: object
+      properties:
+        name: { type: string, example: "Engineering" }
+        managerUserId: { type: integer, example: 5 }
+
+    DesignationRequest:
+      type: object
+      properties:
+        title: { type: string, example: "Senior Developer" }
+        departmentId: { type: integer, example: 1 }
+
+    EmployeeProfileRequest:
+      type: object
+      properties:
+        userId: { type: integer, example: 10 }
+        employeeCode: { type: string, example: "EMP-001" }
+        firstName: { type: string, example: "John" }
+        lastName: { type: string, example: "Doe" }
+        departmentId: { type: integer, example: 1 }
+        designationId: { type: integer, example: 3 }
+        locationId: { type: integer, example: 1 }
+        joiningDate: { type: string, format: date, example: "2026-04-01" }
+        employmentType: { type: string, example: "FULL_TIME" }
+
+    LeaveTypeRequest:
+      type: object
+      properties:
+        name: { type: string, example: "Sick Leave" }
+        yearlyAllotment: { type: number, example: 12.0 }
+        carryForwardLimit: { type: number, example: 6.0 }
+
+    LeaveRequestPayload:
+      type: object
+      properties:
+        employeeProfileId: { type: integer, example: 10 }
+        leaveTypeId: { type: integer, example: 2 }
+        startDate: { type: string, format: date, example: "2026-04-10" }
+        endDate: { type: string, format: date, example: "2026-04-12" }
+        daysRequested: { type: number, example: 3.0 }
+
+    AttendanceRequest:
+      type: object
+      properties:
+        employeeProfileId: { type: integer, example: 101 }
+        date: { type: string, format: date, example: "2026-03-27" }
+        punchIn: { type: string, format: date-time, example: "2026-03-27T09:00:00" }
+        punchOut: { type: string, format: date-time, example: "2026-03-27T18:00:00" }
+
+    JobOpeningRequest:
+      type: object
+      properties:
+        title: { type: string, example: "React Developer" }
+        departmentId: { type: integer, example: 1 }
+        locationId: { type: integer, example: 1 }
+
+    CandidateRequest:
+      type: object
+      properties:
+        name: { type: string, example: "Alice Johnson" }
+        email: { type: string, example: "alice@email.com" }
+        resumeUrl: { type: string, example: "https://s3.aws.com/resumes/alice.pdf" }
+
+    SalaryComponentRequest:
+      type: object
+      properties:
+        name: { type: string, example: "Basic Pay" }
+        type: { type: string, example: "EARNING" }
+        value: { type: string, example: "40%" }
+
+    PayCycleRequest:
+      type: object
+      properties:
+        cycleName: { type: string, example: "March 2026" }
+        fromDate: { type: string, format: date, example: "2026-03-01" }
+        toDate: { type: string, format: date, example: "2026-03-31" }
