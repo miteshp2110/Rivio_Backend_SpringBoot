@@ -10,6 +10,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RolePermissionId implements Serializable {
-    private Integer roleId;
-    private Integer permissionId;
+    private Integer role;
+    private Integer permission;
 }
