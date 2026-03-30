@@ -2,6 +2,7 @@ package com.cts.rivio.modules.auth.controller;
 
 import com.cts.rivio.core.common.dto.ApiResponse;
 import com.cts.rivio.modules.auth.dto.request.RoleRequest;
+import com.cts.rivio.modules.auth.dto.response.PermissionResponse;
 import com.cts.rivio.modules.auth.dto.response.RoleResponse;
 import com.cts.rivio.modules.auth.service.RoleService;
 import jakarta.validation.Valid;
@@ -43,5 +44,20 @@ public class RoleController {
     public ResponseEntity<ApiResponse<RoleResponse>> update(@PathVariable Integer id, @Valid @RequestBody RoleRequest request) {
         RoleResponse updatedRole = service.update(id, request);
         return ResponseEntity.ok(ApiResponse.success(updatedRole, "Role updated successfully"));
+    }
+
+    @GetMapping("/{id}/permissions")
+    public ResponseEntity<ApiResponse<List<PermissionResponse>>> getRolePermissions(@PathVariable Integer id) {
+        List<PermissionResponse> permissions = service.getPermissionsForRole(id);
+        return ResponseEntity.ok(ApiResponse.success(permissions, "Role permissions fetched successfully"));
+    }
+
+    @PostMapping("/{id}/permissions")
+    public ResponseEntity<ApiResponse<Void>> bindPermissions(
+            @PathVariable Integer id,
+            @RequestBody List<Integer> permissionIds) { // Accepts a raw JSON array of integers: [1, 2, 5]
+
+        service.bindPermissionsToRole(id, permissionIds);
+        return ResponseEntity.ok(ApiResponse.success(null, "Permissions bound to role successfully"));
     }
 }
