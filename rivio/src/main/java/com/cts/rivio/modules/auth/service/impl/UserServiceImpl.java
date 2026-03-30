@@ -1,6 +1,7 @@
 package com.cts.rivio.modules.auth.service.impl;
 
 import com.cts.rivio.core.exception.ResourceNotFoundException;
+import com.cts.rivio.modules.auth.dto.request.PasswordResetRequest;
 import com.cts.rivio.modules.auth.dto.request.UserCreateRequest;
 import com.cts.rivio.modules.auth.dto.response.UserResponse;
 import com.cts.rivio.modules.auth.entity.Role;
@@ -49,5 +50,19 @@ public class UserServiceImpl implements UserService {
         // Save and Map
         user = userRepository.save(user);
         return userMapper.toResponse(user);
+    }
+
+    @Override
+    public void resetPassword(Integer id, PasswordResetRequest request) {
+        // Fetch the user
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+
+        // AC 2: New password must be securely hashed
+        String hashed = passwordEncoder.encode(request.getNewPassword());
+        user.setPasswordHash(hashed);
+
+        // Save the updated user
+        userRepository.save(user);
     }
 }
