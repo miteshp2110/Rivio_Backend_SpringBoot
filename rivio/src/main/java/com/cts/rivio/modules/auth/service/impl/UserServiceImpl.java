@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         user.setPasswordHash(hashed);
 
         // AC 3: Default status is 'Active'
-        user.setStatus(UserStatus.Active);
+        user.setStatus(UserStatus.ACTIVE);
 
         // Save and Map
         user = userRepository.save(user);
