@@ -1,5 +1,6 @@
 package com.cts.rivio.modules.company.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,10 +33,12 @@ public class Designation {
     @JoinColumn(name = "department_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Department department;
 
     @OneToMany(mappedBy = "designation", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private List<EmployeeProfile> employees;
 }

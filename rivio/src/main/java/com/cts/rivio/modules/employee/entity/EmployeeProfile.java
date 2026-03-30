@@ -70,7 +70,7 @@ public class EmployeeProfile {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     @Builder.Default
-    private EmployeeStatus status = EmployeeStatus.Active;
+    private EmployeeStatus status = EmployeeStatus.ACTIVE;
 
     @Column(name = "joining_date", nullable = false)
     private LocalDate joiningDate;

@@ -35,7 +35,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     @Builder.Default
-    private UserStatus status = UserStatus.Active;
+    private UserStatus status = UserStatus.ACTIVE;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
