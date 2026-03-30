@@ -7,6 +7,8 @@ import com.cts.rivio.modules.ats.repository.*;
 import com.cts.rivio.modules.ats.service.JobOpeningService;
 import com.cts.rivio.modules.company.entity.Department;
 import com.cts.rivio.modules.company.entity.Location;
+import com.cts.rivio.modules.company.repository.DepartmentRepository;
+import com.cts.rivio.modules.company.repository.LocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

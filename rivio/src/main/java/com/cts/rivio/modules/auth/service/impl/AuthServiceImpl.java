@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
 
         // 2. Check if Suspended (AC 4: Block if user status is 'Suspended')
-        if (user.getStatus() == UserStatus.Suspended) {
+        if (user.getStatus() == UserStatus.SUSPENDED) {
             throw new UnauthorizedException("Your account has been suspended. Please contact HR.");
         }
 

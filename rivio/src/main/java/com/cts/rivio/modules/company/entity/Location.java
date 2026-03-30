@@ -46,5 +46,6 @@ public class Location {
     @OneToMany(mappedBy = "location", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private List<JobOpening> jobOpenings;
 }
