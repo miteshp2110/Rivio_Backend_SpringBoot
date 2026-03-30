@@ -57,4 +57,9 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> response = ApiResponse.error("An unexpected error occurred: " + ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthorizedException(UnauthorizedException ex) {
+        return new ResponseEntity<>(ApiResponse.error(ex.getMessage()), org.springframework.http.HttpStatus.UNAUTHORIZED);
+    }
 }
