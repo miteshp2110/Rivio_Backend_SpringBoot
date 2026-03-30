@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/roles")
 @RequiredArgsConstructor
@@ -20,11 +22,26 @@ public class RoleController {
     @PostMapping
     public ResponseEntity<ApiResponse<RoleResponse>> create(@Valid @RequestBody RoleRequest request) {
         RoleResponse responseData = service.create(request);
+        return new ResponseEntity<>(ApiResponse.success(responseData, "Role created successfully"), HttpStatus.CREATED);
+    }
 
-        // AC 2: Returns HTTP 201 Created using our standard ApiResponse wrapper
-        return new ResponseEntity<>(
-                ApiResponse.success(responseData, "Role created successfully"),
-                HttpStatus.CREATED
-        );
+    // --- NEW ENDPOINTS ---
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<RoleResponse>>> getAll() {
+        List<RoleResponse> roles = service.getAll();
+        return ResponseEntity.ok(ApiResponse.success(roles, "Roles fetched successfully"));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<RoleResponse>> getById(@PathVariable Integer id) {
+        RoleResponse role = service.getById(id);
+        return ResponseEntity.ok(ApiResponse.success(role, "Role fetched successfully"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<RoleResponse>> update(@PathVariable Integer id, @Valid @RequestBody RoleRequest request) {
+        RoleResponse updatedRole = service.update(id, request);
+        return ResponseEntity.ok(ApiResponse.success(updatedRole, "Role updated successfully"));
     }
 }
