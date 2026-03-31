@@ -19,4 +19,6 @@ public class EmployeeProfileResponse {
     private String employmentType;
     private String status;
     private LocalDate joiningDate;
+    private String phoneNo;
+    private String bankAccount;
 }
