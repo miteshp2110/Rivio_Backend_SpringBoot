@@ -1,5 +1,6 @@
 package com.cts.rivio.modules.company.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,10 +40,12 @@ public class Location {
     @OneToMany(mappedBy = "location", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private List<EmployeeProfile> employees;
 
     @OneToMany(mappedBy = "location", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private List<JobOpening> jobOpenings;
 }

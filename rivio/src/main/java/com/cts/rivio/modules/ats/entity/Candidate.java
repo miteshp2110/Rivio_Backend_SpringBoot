@@ -1,6 +1,7 @@
 package com.cts.rivio.modules.ats.entity;
 
 import com.cts.rivio.modules.ats.enums.CandidateStage;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,7 @@ public class Candidate {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_opening_id", nullable = false)
+    @JsonIgnore
     private JobOpening jobOpening; // Many-to-One relationship from schema
 
     @Column(nullable = false)
