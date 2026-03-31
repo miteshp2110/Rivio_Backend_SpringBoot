@@ -1,4 +1,5 @@
 package com.cts.rivio.modules.leave.entity;
+
 import com.cts.rivio.modules.employee.entity.EmployeeProfile;
 import com.cts.rivio.modules.leave.enums.LeaveStatus;
 import jakarta.persistence.*;
@@ -15,10 +16,12 @@ public class LeaveRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    // Combined the duplicate employee fields into one clear relationship
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "employee_profile_id", nullable = false)
-    private EmployeeProfile employeeProfile;
+    @JoinColumn(name = "employee_id", nullable = false)
+    private EmployeeProfile employee;
 
+    // Combined the duplicate leaveType fields
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "leave_type_id", nullable = false)
     private LeaveType leaveType;
@@ -34,12 +37,10 @@ public class LeaveRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private LeaveStatus status = LeaveStatus.Pending;
+    @Builder.Default
+    private LeaveStatus status = LeaveStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by_profile_id")
     private EmployeeProfile approvedBy;
 }
-
-
-

@@ -23,7 +23,7 @@ public class EmployeeLeaveBalance {
     @JoinColumn(name = "employee_profile_id", nullable = false)
     private EmployeeProfile employeeProfile;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "leave_type_id", nullable = false)
     private LeaveType leaveType;
 
