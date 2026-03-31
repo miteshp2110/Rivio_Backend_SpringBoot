@@ -2,6 +2,7 @@ package com.cts.rivio.modules.employee.service.impl;
 
 import com.cts.rivio.core.exception.ResourceNotFoundException;
 import com.cts.rivio.modules.auth.entity.User;
+import com.cts.rivio.modules.auth.enums.UserStatus;
 import com.cts.rivio.modules.auth.repository.UserRepository;
 import com.cts.rivio.modules.company.entity.Department;
 import com.cts.rivio.modules.company.entity.Designation;
@@ -10,6 +11,7 @@ import com.cts.rivio.modules.company.repository.DepartmentRepository;
 import com.cts.rivio.modules.company.repository.DesignationRepository;
 import com.cts.rivio.modules.company.repository.LocationRepository;
 import com.cts.rivio.modules.employee.dto.request.EmployeeProfileRequest;
+import com.cts.rivio.modules.employee.dto.request.EmployeeStatusUpdateRequest;
 import com.cts.rivio.modules.employee.dto.request.JobDetailsUpdateRequest;
 import com.cts.rivio.modules.employee.dto.response.EmployeeDirectoryResponse;
 import com.cts.rivio.modules.employee.dto.response.EmployeeProfileResponse;
@@ -27,6 +29,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -125,34 +129,90 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
                 .orElseThrow(() -> new ResourceNotFoundException("Employee Profile", "id", id));
 
 
-        // --- 2. AC 1: Validate New FKs ---
-        Department newDept = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Department", "id", request.getDepartmentId()));
+        // --- 2. AC 1: Validate & Apply New FKs ONLY if they were provided in the request ---
 
-        Designation newDesig = designationRepository.findById(request.getDesignationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Designation", "id", request.getDesignationId()));
+        if (request.getDepartmentId() != null) {
+            Department newDept = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Department", "id", request.getDepartmentId()));
+            profile.setDepartment(newDept);
+        }
 
-        Location newLoc = locationRepository.findById(request.getLocationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Location", "id", request.getLocationId()));
+        if (request.getDesignationId() != null) {
+            Designation newDesig = designationRepository.findById(request.getDesignationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Designation", "id", request.getDesignationId()));
+            profile.setDesignation(newDesig);
+        }
 
-        EmployeeProfile newManager = null;
+        if (request.getLocationId() != null) {
+            Location newLoc = locationRepository.findById(request.getLocationId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Location", "id", request.getLocationId()));
+            profile.setLocation(newLoc);
+        }
+
         if (request.getReportsToProfileId() != null) {
             // Prevent circular reporting (an employee cannot be their own manager)
             if (request.getReportsToProfileId().equals(id)) {
                 throw new IllegalArgumentException("An employee cannot report to themselves.");
             }
-            newManager = employeeRepository.findById(request.getReportsToProfileId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Manager Profile", "id", request.getReportsToProfileId()));
+
+            // Special case: Allow passing '0' or '-1' if HR explicitly wants to REMOVE a manager
+            if (request.getReportsToProfileId() == 0 || request.getReportsToProfileId() == -1) {
+                profile.setManager(null);
+            } else {
+                EmployeeProfile newManager = employeeRepository.findById(request.getReportsToProfileId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Manager Profile", "id", request.getReportsToProfileId()));
+                profile.setManager(newManager);
+            }
         }
 
-        // --- 3. Apply Updates ---
-        profile.setDepartment(newDept);
-        profile.setDesignation(newDesig);
-        profile.setLocation(newLoc);
-        profile.setManager(newManager);
-
+        // Save the updated profile
         profile = employeeRepository.save(profile);
 
+
+
+        return employeeMapper.toResponse(profile);
+    }
+
+
+    @Override
+    @Transactional // AC 2: Ensures BOTH the profile and the user account update together, or roll back if one fails.
+    public EmployeeProfileResponse updateEmployeeStatus(Integer id, EmployeeStatusUpdateRequest request) {
+
+        EmployeeProfile profile = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee Profile", "id", id));
+
+        // --- 1. Validate Exit Date (AC 1) ---
+        if (request.getExitDate() != null) {
+            if (request.getExitDate().isBefore(LocalDate.now()) && !request.isOverridePastDate()) {
+                throw new IllegalArgumentException("Exit date cannot be in the past. To backdate, you must set 'overridePastDate' to true.");
+            }
+            profile.setExitDate(request.getExitDate());
+        } else if (request.getStatus() == EmployeeStatus.TERMINATED) {
+            // Enforce that a terminated employee MUST have an exit date
+            throw new IllegalArgumentException("An exit date must be provided when terminating an employee.");
+        }
+
+        // --- 2. Update Profile Status ---
+        profile.setStatus(request.getStatus());
+
+        // --- 3. Manage Application Login Access (AC 2) ---
+        User user = profile.getUser();
+
+        if (request.getStatus() == EmployeeStatus.TERMINATED) {
+            // Suspend credentials immediately so they cannot log in
+            user.setStatus(UserStatus.SUSPENDED);
+
+        } else if (request.getStatus() == EmployeeStatus.ACTIVE && user.getStatus() == UserStatus.SUSPENDED) {
+            // If HR made a mistake and reactivates them, restore their login access
+            user.setStatus(UserStatus.ACTIVE);
+            profile.setExitDate(null); // Clear the exit date
+        }
+
+        // Save the user (Hibernate will track this, but explicitly saving is good practice)
+        userRepository.save(user);
+
+        // Save the profile and return the flattened DTO
+        profile = employeeRepository.save(profile);
         return employeeMapper.toResponse(profile);
     }
 }

@@ -2,6 +2,8 @@ package com.cts.rivio.modules.employee.controller;
 
 import com.cts.rivio.core.common.dto.ApiResponse;
 import com.cts.rivio.modules.employee.dto.request.EmployeeProfileRequest;
+import com.cts.rivio.modules.employee.dto.request.EmployeeStatusUpdateRequest;
+import com.cts.rivio.modules.employee.dto.request.JobDetailsUpdateRequest;
 import com.cts.rivio.modules.employee.dto.response.EmployeeDirectoryResponse;
 import com.cts.rivio.modules.employee.dto.response.EmployeeProfileResponse;
 import com.cts.rivio.modules.employee.service.EmployeeProfileService;
@@ -41,5 +43,23 @@ public class EmployeeProfileController {
 
         Page<EmployeeDirectoryResponse> directory = employeeService.getEmployeeDirectory(search, page, size);
         return ResponseEntity.ok(ApiResponse.success(directory, "Employee directory fetched successfully"));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<EmployeeProfileResponse>> updateEmployeeStatus(
+            @PathVariable Integer id,
+            @Valid @RequestBody EmployeeStatusUpdateRequest request) {
+
+        EmployeeProfileResponse updatedProfile = employeeService.updateEmployeeStatus(id, request);
+        return ResponseEntity.ok(ApiResponse.success(updatedProfile, "Employee status updated successfully"));
+    }
+    @PutMapping("/{id}/job-details")
+    public ResponseEntity<ApiResponse<EmployeeProfileResponse>> updateJobDetails(
+            @PathVariable Integer id,
+            @Valid @RequestBody JobDetailsUpdateRequest request,
+            @RequestHeader(value = "X-User-Id", defaultValue = "1") Integer changedByUserId) {
+
+        EmployeeProfileResponse updatedProfile = employeeService.updateJobDetails(id, request);
+        return ResponseEntity.ok(ApiResponse.success(updatedProfile, "Job details updated successfully"));
     }
 }
