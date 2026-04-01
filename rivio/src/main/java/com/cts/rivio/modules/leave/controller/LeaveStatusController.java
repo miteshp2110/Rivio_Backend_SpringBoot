@@ -1,8 +1,12 @@
 package com.cts.rivio.modules.leave.controller;
 
+import com.cts.rivio.core.common.dto.ApiResponse;
+import com.cts.rivio.modules.leave.dto.request.LeaveStatusUpdateRequest;
+import com.cts.rivio.modules.leave.dto.response.LeaveRequestResponse;
 import com.cts.rivio.modules.leave.entity.LeaveRequest;
 import com.cts.rivio.modules.leave.enums.LeaveStatus;
 import com.cts.rivio.modules.leave.service.LeaveRequestStatusService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,16 +21,13 @@ public class LeaveStatusController {
     private LeaveRequestStatusService statusService;
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<LeaveRequest> updateLeaveStatus(
+    public ResponseEntity<ApiResponse<LeaveRequestResponse>> updateLeaveStatus(
             @PathVariable Integer id,
-            @RequestBody Map<String, String> requestBody) {
+            @Valid @RequestBody LeaveStatusUpdateRequest requestBody,
+            @RequestHeader(value = "X-Manager-Id", defaultValue = "1") Integer managerId) {
 
-        LeaveStatus newStatus = LeaveStatus.valueOf(requestBody.get("status").toUpperCase());
+        LeaveRequestResponse updated = statusService.updateStatus(id, requestBody.getStatus(), managerId);
 
-        // Note: In a real app, 'manager' would come from the Security Context (JWT)
-        // For now, we are focusing on the transition logic
-        LeaveRequest updated = statusService.updateStatus(id, newStatus, null);
-
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(ApiResponse.success(updated, "Leave request status updated to " + requestBody.getStatus()));
     }
 }

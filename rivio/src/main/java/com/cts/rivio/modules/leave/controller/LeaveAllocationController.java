@@ -1,5 +1,6 @@
 package com.cts.rivio.modules.leave.controller;
 
+import com.cts.rivio.core.common.dto.ApiResponse;
 import com.cts.rivio.modules.leave.service.LeaveAllocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,16 @@ public class LeaveAllocationController {
     private LeaveAllocationService allocationService;
 
     @PostMapping("/allocate")
-    public ResponseEntity<?> runAllocation(@RequestBody(required = false) Map<String, Integer> request) {
+    public ResponseEntity<ApiResponse<Void>> runAllocation(@RequestBody(required = false) Map<String, Integer> request) {
+
         // Default to current year if not provided in JSON body
         Integer year = (request != null && request.containsKey("year"))
                 ? request.get("year")
                 : LocalDate.now().getYear();
 
         allocationService.allocateBalancesForYear(year);
-        return ResponseEntity.ok("Leave balances allocated successfully for year: " + year);
+
+        // Wrapped in standardized ApiResponse
+        return ResponseEntity.ok(ApiResponse.success(null, "Leave balances allocated successfully for year: " + year));
     }
 }

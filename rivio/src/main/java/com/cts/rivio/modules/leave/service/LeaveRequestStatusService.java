@@ -1,9 +1,13 @@
 package com.cts.rivio.modules.leave.service;
 
+import com.cts.rivio.core.exception.ResourceNotFoundException;
 import com.cts.rivio.modules.employee.entity.EmployeeProfile;
+import com.cts.rivio.modules.employee.repository.EmployeeProfileRepository;
+import com.cts.rivio.modules.leave.dto.response.LeaveRequestResponse;
 import com.cts.rivio.modules.leave.entity.EmployeeLeaveBalance;
 import com.cts.rivio.modules.leave.entity.LeaveRequest;
 import com.cts.rivio.modules.leave.enums.LeaveStatus;
+import com.cts.rivio.modules.leave.mapper.LeaveRequestMapper;
 import com.cts.rivio.modules.leave.repository.EmployeeLeaveBalanceRepository;
 import com.cts.rivio.modules.leave.repository.LeaveRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,28 +21,36 @@ public class LeaveRequestStatusService {
 
     @Autowired private LeaveRequestRepository requestRepository;
     @Autowired private EmployeeLeaveBalanceRepository balanceRepository;
+    @Autowired private EmployeeProfileRepository employeeRepository;
+    @Autowired private LeaveRequestMapper mapper;
 
-    @Transactional
-    public LeaveRequest updateStatus(Integer requestId, LeaveStatus newStatus, EmployeeProfile manager) {
+    @Transactional // AC 1: Balance update and status change must succeed or fail together
+    public LeaveRequestResponse updateStatus(Integer requestId, LeaveStatus newStatus, Integer managerId) {
+
         // 1. Fetch the request
         LeaveRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Leave Request not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Leave Request", "id", requestId));
 
-        // 2. Prevent duplicate processing
+        // 2. Fetch the Manager
+        EmployeeProfile manager = employeeRepository.findById(managerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Manager Profile", "id", managerId));
+
+        // 3. Prevent duplicate processing
         if (request.getStatus() != LeaveStatus.PENDING) {
-            throw new IllegalStateException("Request is already " + request.getStatus());
+            throw new IllegalArgumentException("This request has already been marked as " + request.getStatus());
         }
 
-        // 3. If Approved, update the balance
+        // 4. If Approved, update the balance
         if (newStatus == LeaveStatus.APPROVED) {
             deductBalance(request);
         }
 
-        // 4. Update request details (LEAV-25 AC2)
+        // 5. AC 2: Update request details & record approved_by_profile_id
         request.setStatus(newStatus);
-        request.setApprovedBy(manager); // Assuming you have this field in LeaveRequest
+        request.setApprovedBy(manager);
 
-        return requestRepository.save(request);
+        request = requestRepository.save(request);
+        return mapper.toResponse(request);
     }
 
     private void deductBalance(LeaveRequest request) {
@@ -48,13 +60,16 @@ public class LeaveRequestStatusService {
                 request.getEmployee().getId(),
                 request.getLeaveType().getId(),
                 year
-        ).orElseThrow(() -> new RuntimeException("No leave balance found for this year"));
+        ).orElseThrow(() -> new IllegalArgumentException("No leave balance found for this year"));
 
-        // Calculate duration (simple days check)
-        long days = java.time.temporal.ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate()) + 1;
-        BigDecimal leaveDays = BigDecimal.valueOf(days);
+        BigDecimal leaveDays = request.getDaysRequested();
 
-        // Update consumed count
+        // Failsafe: Ensure they didn't run out of balance between applying and approval
+        if (balance.getBalance().compareTo(leaveDays) < 0) {
+            throw new IllegalArgumentException("Employee does not have enough balance remaining to approve this leave.");
+        }
+
+        // Increment consumed count
         balance.setConsumed(balance.getConsumed().add(leaveDays));
         balanceRepository.save(balance);
     }

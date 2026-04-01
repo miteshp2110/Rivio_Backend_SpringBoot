@@ -17,7 +17,9 @@ public class LeaveBalanceService {
     public List<EmployeeLeaveBalance> getBalancesByEmployee(Integer employeeId, Integer year) {
         // Default to current year if not specified
         int targetYear = (year != null) ? year : LocalDate.now().getYear();
-// New/Correct call matching the Repository
-        return balanceRepository.findByEmployeeProfileIdAndYear(employeeId, year);
+
+        // FIX: Change 'year' to 'targetYear' in the repository call
+        return balanceRepository.findByEmployeeProfileIdAndYear(employeeId, targetYear);
+
     }
 }

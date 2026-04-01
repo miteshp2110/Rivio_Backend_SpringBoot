@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile, Integer> {
 
@@ -17,6 +19,8 @@ public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile
 
     // Ensure the User isn't already linked to another profile
     boolean existsByUserId(Integer userId);
+
+    List<EmployeeProfile> findByStatus(EmployeeStatus status);
 
     @Query("SELECT e FROM EmployeeProfile e WHERE e.status = :status AND " +
             "(:search IS NULL OR LOWER(e.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +

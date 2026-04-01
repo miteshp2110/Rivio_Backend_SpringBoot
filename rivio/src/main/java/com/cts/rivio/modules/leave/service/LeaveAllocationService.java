@@ -1,7 +1,8 @@
 package com.cts.rivio.modules.leave.service;
 
 import com.cts.rivio.modules.employee.entity.EmployeeProfile;
-import com.cts.rivio.modules.employee.repository.EmployeeProfileRepository; // CRITICAL IMPORT
+import com.cts.rivio.modules.employee.enums.EmployeeStatus;
+import com.cts.rivio.modules.employee.repository.EmployeeProfileRepository;
 import com.cts.rivio.modules.leave.entity.EmployeeLeaveBalance;
 import com.cts.rivio.modules.leave.entity.LeaveType;
 import com.cts.rivio.modules.leave.repository.EmployeeLeaveBalanceRepository;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -23,13 +23,17 @@ public class LeaveAllocationService {
 
     @Transactional
     public void allocateBalancesForYear(Integer year) {
-        List<EmployeeProfile> employees = employeeRepository.findAll();
+
+        // FIX: Only fetch ACTIVE employees, excluding Terminated/Suspended
+        List<EmployeeProfile> employees = employeeRepository.findByStatus(EmployeeStatus.ACTIVE);
+
         List<LeaveType> leaveTypes = leaveTypeRepository.findAll();
 
         for (EmployeeProfile employee : employees) {
             for (LeaveType type : leaveTypes) {
 
                 // 1. Idempotency Check (LEAV-21 AC1)
+                // If a record already exists for this employee, leave type, and year, skip it.
                 if (balanceRepository.findByEmployeeProfileIdAndLeaveTypeIdAndYear(
                         employee.getId(), type.getId(), year).isPresent()) {
                     continue;

@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.cts.rivio.core.common.dto.ApiResponse;
+import com.cts.rivio.modules.leave.dto.request.LeaveRequestPayload;
+import com.cts.rivio.modules.leave.dto.response.LeaveRequestResponse;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -17,26 +21,18 @@ public class LeaveRequestController {
     @Autowired
     private LeaveRequestService leaveRequestService;
 
-    /**
-     * [LEAV-24] GET /api/leave-requests/pending/{managerId}
-     * Fetches requests for a manager's direct reports.
-     */
-    @GetMapping("/pending/{managerId}")
-    public ResponseEntity<List<LeaveRequest>> getPending(
-            @PathVariable Integer managerId,
+    @GetMapping("/pending")
+    public ResponseEntity<ApiResponse<List<LeaveRequestResponse>>> getPending(
+            @RequestHeader(value = "X-Manager-Id", defaultValue = "1") Integer managerId,
             @RequestParam(required = false) LeaveStatus status) {
 
-        return ResponseEntity.ok(leaveRequestService.getManagerPendingRequests(managerId, status));
+        List<LeaveRequestResponse> pendingRequests = leaveRequestService.getManagerPendingRequests(managerId, status);
+        return ResponseEntity.ok(ApiResponse.success(pendingRequests, "Team leave requests fetched successfully"));
     }
 
-    /**
-     * [LEAV-20] POST /api/leave-requests
-     * Endpoint for employees to submit a new leave request.
-     * Includes balance and date validation logic.
-     */
     @PostMapping
-    public ResponseEntity<LeaveRequest> submitRequest(@RequestBody LeaveRequest leaveRequest) {
-        LeaveRequest savedRequest = leaveRequestService.submitRequest(leaveRequest);
-        return new ResponseEntity<>(savedRequest, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<LeaveRequestResponse>> submitRequest(@Valid @RequestBody LeaveRequestPayload payload) {
+        LeaveRequestResponse responseData = leaveRequestService.submitRequest(payload);
+        return new ResponseEntity<>(ApiResponse.success(responseData, "Leave request submitted successfully"), HttpStatus.CREATED);
     }
 }

@@ -18,7 +18,7 @@ public class LeaveRequest {
 
     // Combined the duplicate employee fields into one clear relationship
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "employee_id", nullable = false)
+    @JoinColumn(name = "employee_profile_id", nullable = false)
     private EmployeeProfile employee;
 
     // Combined the duplicate leaveType fields
