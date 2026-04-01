@@ -1,4 +1,4 @@
-package com.cts.rivio.modules.attendance.dto;
+package com.cts.rivio.modules.attendance.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

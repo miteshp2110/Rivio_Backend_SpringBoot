@@ -1,14 +1,13 @@
 package com.cts.rivio.modules.attendance.service;
 
-import com.cts.rivio.modules.attendance.dto.HolidayRequest;
-import com.cts.rivio.modules.attendance.dto.HolidayResponse;
-import java.util.List; // 1. Make sure this import is at the top
+import com.cts.rivio.modules.attendance.dto.request.HolidayRequest;
+import com.cts.rivio.modules.attendance.dto.response.HolidayResponse;
+import java.util.List;
 
 public interface HolidayService {
-
-    // Method for POST (Creating)
     HolidayResponse createHoliday(HolidayRequest request);
-
-    // Method for GET (Retrieving all)
     List<HolidayResponse> getAllHolidays();
+
+    // --- NEW METHOD ---
+    void deleteHoliday(Integer id);
 }

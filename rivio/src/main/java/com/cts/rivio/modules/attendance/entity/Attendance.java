@@ -4,10 +4,7 @@ import com.cts.rivio.modules.attendance.enums.AttendanceStatus;
 import com.cts.rivio.modules.auth.entity.User;
 import com.cts.rivio.modules.employee.entity.EmployeeProfile;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,19 +12,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "attendance",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_employee_date",
-                        columnNames = {"employee_profile_id", "date"}
-                )
-        }
-)
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "attendance", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"employee_profile_id", "date"})
+})
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 public class Attendance {
 
     @Id
@@ -50,7 +39,7 @@ public class Attendance {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     @Builder.Default
-    private AttendanceStatus status = AttendanceStatus.Present;
+    private AttendanceStatus status = AttendanceStatus.PRESENT;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")

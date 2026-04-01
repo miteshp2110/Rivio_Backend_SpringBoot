@@ -1,4 +1,4 @@
-package com.cts.rivio.modules.attendance.dto;
+package com.cts.rivio.modules.attendance.dto.response;
 
 import lombok.Data;
 import java.time.LocalDate;

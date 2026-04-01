@@ -1,7 +1,8 @@
-package com.cts.rivio.modules.attendance.service.impl; // Ensure this matches your folder
+package com.cts.rivio.modules.attendance.service.impl;
 
-import com.cts.rivio.modules.attendance.dto.HolidayRequest;
-import com.cts.rivio.modules.attendance.dto.HolidayResponse;
+import com.cts.rivio.core.exception.ResourceNotFoundException;
+import com.cts.rivio.modules.attendance.dto.request.HolidayRequest;
+import com.cts.rivio.modules.attendance.dto.response.HolidayResponse;
 import com.cts.rivio.modules.attendance.entity.Holiday;
 import com.cts.rivio.modules.attendance.repository.HolidayRepository;
 import com.cts.rivio.modules.attendance.service.HolidayService;
@@ -10,8 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List; // ADD THIS
-import java.util.stream.Collectors; // ADD THIS
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,6 @@ public class HolidayServiceImpl implements HolidayService {
 
     @Override
     public HolidayResponse createHoliday(HolidayRequest request) {
-        // ... (Your existing code for creating a holiday remains here) ...
         if (holidayRepository.existsByDate(request.getDate())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Date already exists!");
         }
@@ -41,13 +41,11 @@ public class HolidayServiceImpl implements HolidayService {
         return response;
     }
 
-    // ADD THIS NEW METHOD HERE
     @Override
     public List<HolidayResponse> getAllHolidays() {
-        // 1. Fetch all records from the database table
-        List<Holiday> holidays = holidayRepository.findAll();
+        // AC 1: Fetch all records chronologically
+        List<Holiday> holidays = holidayRepository.findAllByOrderByDateAsc();
 
-        // 2. Convert each 'Holiday' entity into a 'HolidayResponse' DTO
         return holidays.stream().map(holiday -> {
             HolidayResponse res = new HolidayResponse();
             res.setId(holiday.getId());
@@ -55,5 +53,14 @@ public class HolidayServiceImpl implements HolidayService {
             res.setName(holiday.getName());
             return res;
         }).collect(Collectors.toList());
+    }
+
+    // --- NEW METHOD (AC 2) ---
+    @Override
+    public void deleteHoliday(Integer id) {
+        Holiday holiday = holidayRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Holiday", "id", id));
+
+        holidayRepository.delete(holiday);
     }
 }
