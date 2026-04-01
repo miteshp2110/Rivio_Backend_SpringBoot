@@ -5,14 +5,17 @@ import com.cts.rivio.modules.leave.enums.LeaveStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
-@Repository
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Integer> {
 
-    // This query finds requests where the employee's manager ID matches the input
+    // FIX: Explicitly tell Spring how to find the manager via the employee relationship
     @Query("SELECT lr FROM LeaveRequest lr WHERE lr.employee.manager.id = :managerId AND lr.status = :status")
     List<LeaveRequest> findByManagerIdAndStatus(@Param("managerId") Integer managerId, @Param("status") LeaveStatus status);
+
+    // Existing ATTN-33 method
+    @Query("SELECT COUNT(l) > 0 FROM LeaveRequest l WHERE l.employee.id = :empId AND l.status = 'APPROVED' AND :targetDate BETWEEN l.startDate AND l.endDate")
+    boolean hasApprovedLeaveOnDate(@Param("empId") Integer empId, @Param("targetDate") LocalDate targetDate);
 }
