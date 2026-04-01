@@ -25,11 +25,11 @@ public class JobOpening {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
-    private Department department;
+    private Department department; // Now correctly refers to ats.entity.Department
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
+    private Location location;     // Now correctly refers to ats.entity.Location
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
