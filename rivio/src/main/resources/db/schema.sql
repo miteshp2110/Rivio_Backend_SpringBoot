@@ -27,7 +27,7 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
-    status ENUM('Active', 'Suspended') DEFAULT 'Active',
+    status ENUM('ACTIVE', 'SUSPENDED') DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -73,8 +73,8 @@ CREATE TABLE employee_profiles (
     department_id INT NOT NULL,
     designation_id INT NOT NULL,
     reports_to_profile_id INT COMMENT 'Direct Manager',
-    employment_type ENUM('Full-Time', 'Contract', 'Intern') DEFAULT 'Full-Time',
-    status ENUM('Active', 'Probation', 'Notice_Period', 'Terminated') DEFAULT 'Active',
+    employment_type ENUM('FULL_TIME', 'CONTRACT', 'INTERN') DEFAULT 'FULL-TIME',
+    status ENUM('ACTIVE', 'PROBATION', 'NOTICE_PERIOD', 'TERMINATED') DEFAULT 'ACTIVE',
     joining_date DATE NOT NULL,
     exit_date DATE
 );
@@ -104,7 +104,7 @@ CREATE TABLE leave_requests (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     days_requested DECIMAL(4,1) NOT NULL,
-    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING',
     approved_by_profile_id INT
 );
 
@@ -120,7 +120,7 @@ CREATE TABLE pay_cycles (
     cycle_name VARCHAR(100) NOT NULL COMMENT 'e.g., March 2026',
     from_date DATE NOT NULL,
     to_date DATE NOT NULL,
-    status ENUM('Draft', 'Processing', 'Finalized', 'Paid') DEFAULT 'Draft'
+    status ENUM('DRAFT', 'PROCESSING', 'FINALIZED', 'PAID') DEFAULT 'DRAFT'
 );
 
 CREATE TABLE payslips (
@@ -138,7 +138,7 @@ CREATE TABLE job_openings (
     department_id INT NOT NULL,
     location_id INT NOT NULL,
     title VARCHAR(100) NOT NULL,
-    status ENUM('Open', 'Closed', 'On_Hold') DEFAULT 'Open'
+    status ENUM('OPEN', 'CLOSED', 'ON_HOLD') DEFAULT 'OPEN'
 );
 
 CREATE TABLE candidates (
@@ -147,7 +147,7 @@ CREATE TABLE candidates (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     resume_url VARCHAR(255) NOT NULL,
-    stage ENUM('Applied', 'Interviewing', 'Offered', 'Hired', 'Rejected') DEFAULT 'Applied'
+    stage ENUM('APPLIED', 'INTERVIEWING', 'OFFERED', 'HIRED', 'REJECTED') DEFAULT 'APPLIED'
 );
 
 CREATE TABLE holidays (
@@ -168,7 +168,7 @@ CREATE TABLE attendance (
     date DATE NOT NULL,
     punch_in DATETIME,
     punch_out DATETIME,
-    status ENUM('Present', 'Absent', 'Leave', 'Holiday') DEFAULT 'Present',
+    status ENUM('PRESENT', 'ABSENT', 'LEAVE', 'HOLIDAY') DEFAULT 'PRESENT',
     created_by_user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
