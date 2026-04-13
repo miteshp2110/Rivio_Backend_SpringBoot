@@ -27,12 +27,6 @@ INSERT INTO leave_types (id, name, yearly_allotment, carry_forward_limit) VALUES
 (2, 'Casual Leave', 10.00, 0.00),
 (3, 'Earned Leave', 15.00, 5.00);
 
-INSERT INTO salary_components (id, name, type, value) VALUES
-(1, 'Basic Pay', 'EARNING', 50000.00),
-(2, 'House Rent Allowance', 'EARNING', 20000.00),
-(3, 'Provident Fund', 'DEDUCTION', 1800.00),
-(4, 'Professional Tax', 'DEDUCTION', 200.00);
-
 INSERT INTO pay_cycles (id, cycle_name, from_date, to_date, status) VALUES
 (1, 'February 2026', '2026-02-01', '2026-02-28', 'PAID'),
 (2, 'March 2026', '2026-03-01', '2026-03-31', 'PROCESSING');
@@ -115,7 +109,27 @@ INSERT INTO employee_profiles (
  'CONTRACT', 'ACTIVE', '2025-01-20');
 
 -- ==========================================
--- 5. LEAVES, ATTENDANCE & PAYROLL
+-- 5. SALARY COMPONENTS (Moved here after Profiles)
+-- ==========================================
+
+INSERT INTO salary_components (id, employee_profile_id, name, type, value) VALUES
+-- John (VP)
+(1, 1, 'Basic Pay', 'EARNING', 100000.00),
+(2, 1, 'House Rent Allowance', 'EARNING', 40000.00),
+(3, 1, 'Provident Fund', 'DEDUCTION', 1800.00),
+-- Sarah (HR Director)
+(4, 2, 'Basic Pay', 'EARNING', 80000.00),
+(5, 2, 'House Rent Allowance', 'EARNING', 30000.00),
+(6, 2, 'Provident Fund', 'DEDUCTION', 1800.00),
+-- Alice (Senior Engineer)
+(7, 3, 'Basic Pay', 'EARNING', 60000.00),
+(8, 3, 'House Rent Allowance', 'EARNING', 25000.00),
+(9, 3, 'Provident Fund', 'DEDUCTION', 1800.00),
+-- Bob (Contract Developer)
+(10, 4, 'Consolidated Pay', 'EARNING', 50000.00);
+
+-- ==========================================
+-- 6. LEAVES, ATTENDANCE & PAYROLL
 -- ==========================================
 
 INSERT INTO employee_leave_balances
@@ -138,11 +152,11 @@ INSERT INTO attendance
 
 INSERT INTO payslips
 (id, pay_cycle_id, employee_profile_id, gross_earnings, total_deductions, net_pay) VALUES
-(1, 1, 1, 150000.00, 15000.00, 135000.00),
-(2, 1, 3, 80000.00, 5000.00, 75000.00);
+(1, 1, 1, 140000.00, 1800.00, 138200.00),
+(2, 1, 3, 85000.00, 1800.00, 83200.00);
 
 -- ==========================================
--- 6. ATS & AUDIT LOGS
+-- 7. ATS & AUDIT LOGS
 -- ==========================================
 
 INSERT INTO job_openings (id, department_id, location_id, title, status) VALUES

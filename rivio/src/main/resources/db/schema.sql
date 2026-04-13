@@ -2,8 +2,8 @@
 -- 1. CREATE TABLES (Without Foreign Keys)
 -- ==========================================
 
-create database rivio;
-use rivio
+CREATE DATABASE rivio;
+USE rivio;
 
 CREATE TABLE permissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -73,7 +73,7 @@ CREATE TABLE employee_profiles (
     department_id INT NOT NULL,
     designation_id INT NOT NULL,
     reports_to_profile_id INT COMMENT 'Direct Manager',
-    employment_type ENUM('FULL_TIME', 'CONTRACT', 'INTERN') DEFAULT 'FULL-TIME',
+    employment_type ENUM('FULL_TIME', 'CONTRACT', 'INTERN') DEFAULT 'FULL_TIME',
     status ENUM('ACTIVE', 'PROBATION', 'NOTICE_PERIOD', 'TERMINATED') DEFAULT 'ACTIVE',
     joining_date DATE NOT NULL,
     exit_date DATE
@@ -108,11 +108,14 @@ CREATE TABLE leave_requests (
     approved_by_profile_id INT
 );
 
+-- SIMPLIFIED: Employee ID is directly in the component table
 CREATE TABLE salary_components (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_profile_id INT NOT NULL,
     name VARCHAR(100) NOT NULL COMMENT 'e.g., Basic, HRA, Provident Fund, TDS',
     type ENUM('EARNING', 'DEDUCTION') NOT NULL,
-    value DECIMAL(10,2) NOT NULL
+    value DECIMAL(10,2) NOT NULL,
+    UNIQUE KEY (employee_profile_id, name) COMMENT 'Ensures an employee doesnt get duplicate Basic components'
 );
 
 CREATE TABLE pay_cycles (
@@ -210,6 +213,10 @@ ALTER TABLE leave_requests
     ADD FOREIGN KEY (employee_profile_id) REFERENCES employee_profiles(id) ON DELETE CASCADE,
     ADD FOREIGN KEY (leave_type_id) REFERENCES leave_types(id),
     ADD FOREIGN KEY (approved_by_profile_id) REFERENCES employee_profiles(id) ON DELETE SET NULL;
+
+-- NEW FOREIGN KEY linking salary components directly to the employee
+ALTER TABLE salary_components
+    ADD FOREIGN KEY (employee_profile_id) REFERENCES employee_profiles(id) ON DELETE CASCADE;
 
 ALTER TABLE payslips
     ADD FOREIGN KEY (pay_cycle_id) REFERENCES pay_cycles(id),
