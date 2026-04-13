@@ -2,6 +2,7 @@ package com.cts.rivio.controller;
 
 import com.cts.rivio.core.common.dto.ApiResponse;
 import com.cts.rivio.dto.request.PayCycleRequest;
+import com.cts.rivio.dto.request.PayCycleStatusUpdateRequest;
 import com.cts.rivio.dto.response.PayCycleResponse;
 import com.cts.rivio.dto.response.PaySlipResponse;
 import com.cts.rivio.service.PayCycleService;
@@ -66,4 +67,18 @@ public class PayCycleController {
         PaySlipResponse response = payrollService.getPayslipByEmployeeAndPayCycle(id, employeeId);
         return ResponseEntity.ok(ApiResponse.success(response, "Employee payslip fetched successfully"));
     }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<PayCycleResponse>> updatePayCycleStatus(
+            @PathVariable Integer id,
+            @Valid @RequestBody PayCycleStatusUpdateRequest request) {
+
+        PayCycleResponse response = payCycleService.updateStatus(id, request.getStatus());
+
+        return ResponseEntity.ok(ApiResponse.success(
+                response,
+                "Pay cycle status successfully transitioned to " + request.getStatus()
+        ));
+    }
+
 }
