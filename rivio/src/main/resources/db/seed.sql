@@ -1,5 +1,7 @@
+USE rivio;
+
 -- ==========================================
--- 1. BASE CONFIGURATION TABLES (No Dependencies)
+-- 1. BASE CONFIGURATION TABLES
 -- ==========================================
 
 INSERT INTO permissions (id, module, key_name) VALUES
@@ -32,8 +34,8 @@ INSERT INTO salary_components (id, name, type, value) VALUES
 (4, 'Professional Tax', 'DEDUCTION', 200.00);
 
 INSERT INTO pay_cycles (id, cycle_name, from_date, to_date, status) VALUES
-(1, 'February 2026', '2026-02-01', '2026-02-28', 'Paid'),
-(2, 'March 2026', '2026-03-01', '2026-03-31', 'Processing');
+(1, 'February 2026', '2026-02-01', '2026-02-28', 'PAID'),
+(2, 'March 2026', '2026-03-01', '2026-03-31', 'PROCESSING');
 
 INSERT INTO holidays (id, date, name) VALUES
 (1, '2026-01-01', 'New Year'),
@@ -41,8 +43,12 @@ INSERT INTO holidays (id, date, name) VALUES
 (3, '2026-05-01', 'Labour Day');
 
 INSERT INTO work_days (id, day_name, is_working_day) VALUES
-(1, 'Monday', TRUE), (2, 'Tuesday', TRUE), (3, 'Wednesday', TRUE),
-(4, 'Thursday', TRUE), (5, 'Friday', TRUE), (6, 'Saturday', FALSE),
+(1, 'Monday', TRUE),
+(2, 'Tuesday', TRUE),
+(3, 'Wednesday', TRUE),
+(4, 'Thursday', TRUE),
+(5, 'Friday', TRUE),
+(6, 'Saturday', FALSE),
 (7, 'Sunday', FALSE);
 
 -- ==========================================
@@ -50,24 +56,22 @@ INSERT INTO work_days (id, day_name, is_working_day) VALUES
 -- ==========================================
 
 INSERT INTO role_permissions (role_id, permission_id) VALUES
-(1, 1), -- Admin has all access
-(2, 2), (2, 3), (2, 4), (2, 5), -- HR has Leave, Payroll, ATS, Profile
-(3, 2), (3, 5), -- Dept Head can approve leave and view profiles
-(4, 5); -- Employee can just view profiles
+(1, 1),
+(2, 2), (2, 3), (2, 4), (2, 5),
+(3, 2), (3, 5),
+(4, 5);
 
--- Passwords are hashed using SHA2 for realistic dummy data ('password123')
 INSERT INTO users (id, email, password_hash, role_id, status) VALUES
-(1, 'admin@rivio.com', SHA2('password123', 256), 1, 'Active'),
-(2, 'sarah.hr@rivio.com', SHA2('password123', 256), 2, 'Active'),
-(3, 'john.manager@rivio.com', SHA2('password123', 256), 3, 'Active'),
-(4, 'alice.emp@rivio.com', SHA2('password123', 256), 4, 'Active'),
-(5, 'bob.emp@rivio.com', SHA2('password123', 256), 4, 'Active');
+(1, 'admin@rivio.com', SHA2('password123', 256), 1, 'ACTIVE'),
+(2, 'sarah.hr@rivio.com', SHA2('password123', 256), 2, 'ACTIVE'),
+(3, 'john.manager@rivio.com', SHA2('password123', 256), 3, 'ACTIVE'),
+(4, 'alice.emp@rivio.com', SHA2('password123', 256), 4, 'ACTIVE'),
+(5, 'bob.emp@rivio.com', SHA2('password123', 256), 4, 'ACTIVE');
 
 -- ==========================================
--- 3. ORGANIZATIONAL STRUCTURE
+-- 3. ORGANIZATION STRUCTURE
 -- ==========================================
 
--- Inserting Departments (Linking manager_user_id to users table)
 INSERT INTO departments (id, name, manager_user_id) VALUES
 (1, 'Engineering', 3),
 (2, 'Human Resources', 2),
@@ -81,53 +85,79 @@ INSERT INTO designations (id, title, department_id) VALUES
 (5, 'Sales Executive', 3);
 
 -- ==========================================
--- 4. EMPLOYEE PROFILES (Self-referencing & Complex Foreign Keys)
+-- 4. EMPLOYEE PROFILES
 -- ==========================================
 
--- Insert the Manager/Heads first so we can use their profile IDs for 'reports_to_profile_id'
-INSERT INTO employee_profiles (id, user_id, employee_code, first_name, last_name, bank_account, phone_no, location_id, department_id, designation_id, reports_to_profile_id, employment_type, status, joining_date) VALUES
-(1, 3, 'RIV-001', 'John', 'Doe', 'ACCT123456', '9876543210', 1, 1, 1, NULL, 'Full-Time', 'Active', '2020-01-15'), -- Manager
-(2, 2, 'RIV-002', 'Sarah', 'Connor', 'ACCT654321', '9876543211', 1, 2, 4, NULL, 'Full-Time', 'Active', '2021-03-01'); -- HR Head
+INSERT INTO employee_profiles (
+    id, user_id, employee_code, first_name, last_name,
+    bank_account, phone_no, location_id,
+    department_id, designation_id, reports_to_profile_id,
+    employment_type, status, joining_date
+) VALUES
+(1, 3, 'RIV-001', 'John', 'Doe',
+ 'ACCT123456', '9876543210', 1,
+ 1, 1, NULL,
+ 'FULL_TIME', 'ACTIVE', '2020-01-15'),
 
--- Insert Subordinates reporting to E-Profile 1 (John Doe)
-INSERT INTO employee_profiles (id, user_id, employee_code, first_name, last_name, bank_account, phone_no, location_id, department_id, designation_id, reports_to_profile_id, employment_type, status, joining_date) VALUES
-(3, 4, 'RIV-003', 'Alice', 'Smith', 'ACCT111222', '9876543212', 1, 1, 2, 1, 'Full-Time', 'Active', '2023-06-10'),
-(4, 5, 'RIV-004', 'Bob', 'Marley', 'ACCT333444', '9876543213', 2, 1, 3, 1, 'Contract', 'Active', '2025-01-20');
+(2, 2, 'RIV-002', 'Sarah', 'Connor',
+ 'ACCT654321', '9876543211', 1,
+ 2, 4, NULL,
+ 'FULL_TIME', 'ACTIVE', '2021-03-01'),
 
--- ==========================================
--- 5. LEAVES, ATTENDANCE, & PAYROLL
--- ==========================================
+(3, 4, 'RIV-003', 'Alice', 'Smith',
+ 'ACCT111222', '9876543212', 1,
+ 1, 2, 1,
+ 'FULL_TIME', 'ACTIVE', '2023-06-10'),
 
--- Leave Balances (Note: 'balance' is a generated column, so we exclude it from the INSERT)
-INSERT INTO employee_leave_balances (employee_profile_id, leave_type_id, year, allotted, consumed) VALUES
-(3, 1, 2026, 12.00, 2.00), -- Alice took 2 Sick Leaves
-(3, 2, 2026, 10.00, 0.00), -- Alice Casual Leaves
-(4, 1, 2026, 12.00, 0.00); -- Bob Sick Leaves
-
-INSERT INTO leave_requests (id, employee_profile_id, leave_type_id, start_date, end_date, days_requested, status, approved_by_profile_id) VALUES
-(1, 3, 1, '2026-03-10', '2026-03-11', 2.0, 'Approved', 1), -- Alice's approved sick leave
-(2, 4, 2, '2026-04-01', '2026-04-02', 2.0, 'Pending', NULL); -- Bob's pending casual leave
-
-INSERT INTO attendance (id, employee_profile_id, date, punch_in, punch_out, status, created_by_user_id) VALUES
-(1, 1, '2026-03-27', '2026-03-27 09:00:00', '2026-03-27 18:00:00', 'Present', 1),
-(2, 3, '2026-03-27', '2026-03-27 09:15:00', NULL, 'Present', 1),
-(3, 4, '2026-03-27', NULL, NULL, 'Leave', 1);
-
-INSERT INTO payslips (id, pay_cycle_id, employee_profile_id, gross_earnings, total_deductions, net_pay) VALUES
-(1, 1, 1, 150000.00, 15000.00, 135000.00), -- John's Feb Payslip
-(2, 1, 3, 80000.00, 5000.00, 75000.00);    -- Alice's Feb Payslip
+(4, 5, 'RIV-004', 'Bob', 'Marley',
+ 'ACCT333444', '9876543213', 2,
+ 1, 3, 1,
+ 'CONTRACT', 'ACTIVE', '2025-01-20');
 
 -- ==========================================
--- 6. APPLICANT TRACKING SYSTEM (ATS) & AUDIT LOGS
+-- 5. LEAVES, ATTENDANCE & PAYROLL
+-- ==========================================
+
+INSERT INTO employee_leave_balances
+(employee_profile_id, leave_type_id, year, allotted, consumed) VALUES
+(3, 1, 2026, 12.00, 2.00),
+(3, 2, 2026, 10.00, 0.00),
+(4, 1, 2026, 12.00, 0.00);
+
+INSERT INTO leave_requests
+(id, employee_profile_id, leave_type_id, start_date, end_date,
+ days_requested, status, approved_by_profile_id) VALUES
+(1, 3, 1, '2026-03-10', '2026-03-11', 2.0, 'APPROVED', 1),
+(2, 4, 2, '2026-04-01', '2026-04-02', 2.0, 'PENDING', NULL);
+
+INSERT INTO attendance
+(id, employee_profile_id, date, punch_in, punch_out, status, created_by_user_id) VALUES
+(1, 1, '2026-03-27', '2026-03-27 09:00:00', '2026-03-27 18:00:00', 'PRESENT', 1),
+(2, 3, '2026-03-27', '2026-03-27 09:15:00', NULL, 'PRESENT', 1),
+(3, 4, '2026-03-27', NULL, NULL, 'LEAVE', 1);
+
+INSERT INTO payslips
+(id, pay_cycle_id, employee_profile_id, gross_earnings, total_deductions, net_pay) VALUES
+(1, 1, 1, 150000.00, 15000.00, 135000.00),
+(2, 1, 3, 80000.00, 5000.00, 75000.00);
+
+-- ==========================================
+-- 6. ATS & AUDIT LOGS
 -- ==========================================
 
 INSERT INTO job_openings (id, department_id, location_id, title, status) VALUES
-(1, 1, 1, 'Lead Backend Engineer', 'Open'),
-(2, 3, 2, 'Regional Sales Manager', 'On_Hold');
+(1, 1, 1, 'Lead Backend Engineer', 'OPEN'),
+(2, 3, 2, 'Regional Sales Manager', 'ON_HOLD');
 
-INSERT INTO candidates (id, job_opening_id, name, email, resume_url, stage) VALUES
-(1, 1, 'Charlie Brown', 'charlie@example.com', 'https://rivio.com/resumes/charlie.pdf', 'Interviewing'),
-(2, 1, 'Diana Prince', 'diana@example.com', 'https://rivio.com/resumes/diana.pdf', 'Offered');
+INSERT INTO candidates
+(id, job_opening_id, name, email, resume_url, stage) VALUES
+(1, 1, 'Charlie Brown', 'charlie@example.com',
+ 'https://rivio.com/resumes/charlie.pdf', 'INTERVIEWING'),
+(2, 1, 'Diana Prince', 'diana@example.com',
+ 'https://rivio.com/resumes/diana.pdf', 'OFFERED');
 
-INSERT INTO audit_logs (id, table_name, record_id, action, old_data, new_data, changed_by_user_id) VALUES
-(1, 'departments', 1, 'UPDATE', '{"manager_user_id": null}', '{"manager_user_id": 3}', 1);
+INSERT INTO audit_logs
+(id, table_name, record_id, action, old_data, new_data, changed_by_user_id) VALUES
+(1, 'departments', 1, 'UPDATE',
+ '{"manager_user_id": null}',
+ '{"manager_user_id": 3}', 1);
