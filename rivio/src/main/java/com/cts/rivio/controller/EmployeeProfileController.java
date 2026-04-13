@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.cts.rivio.dto.request.EmployeeBasicInfoRequest;
 
 @RestController
 @RequestMapping("/employees")
@@ -62,4 +63,15 @@ public class EmployeeProfileController {
         EmployeeProfileResponse updatedProfile = employeeService.updateJobDetails(id, request);
         return ResponseEntity.ok(ApiResponse.success(updatedProfile, "Job details updated successfully"));
     }
+
+    @PatchMapping("/{id}/basic-info")
+    public ResponseEntity<ApiResponse<EmployeeProfileResponse>> updateBasicInfo(
+            @PathVariable Integer id,
+            @RequestBody EmployeeBasicInfoRequest request) {
+
+        // This will now resolve correctly
+        EmployeeProfileResponse updatedProfile = employeeService.updateBasicInfo(id, request);
+        return ResponseEntity.ok(ApiResponse.success(updatedProfile, "Personal details updated successfully"));
+    }
+
 }

@@ -9,6 +9,7 @@ import com.cts.rivio.entity.Department;
 import com.cts.rivio.mapper.DepartmentMapper;
 import com.cts.rivio.repository.DepartmentRepository;
 import com.cts.rivio.service.DepartmentService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse updateDepartment(Integer id, DepartmentRequest request) {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Department", "id", id));
@@ -69,5 +71,22 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.setManager(manager);
 
         return departmentMapper.toResponse(departmentRepository.save(department));
+    }
+
+    @Override
+    @Transactional
+    public void deleteDepartment(Integer id) {
+        Department department = departmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Department", "id", id));
+
+        // Acceptance Criteria 1: Safe Delete Check
+        boolean hasEmployees = department.getEmployees() != null && !department.getEmployees().isEmpty();
+        boolean hasJobOpenings = department.getJobOpenings() != null && !department.getJobOpenings().isEmpty();
+
+        if (hasEmployees || hasJobOpenings) {
+            throw new IllegalArgumentException("Cannot delete department: It is linked to active employees or job openings.");
+        }
+
+        departmentRepository.delete(department);
     }
 }

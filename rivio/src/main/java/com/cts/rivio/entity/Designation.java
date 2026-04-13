@@ -40,4 +40,6 @@ public class Designation {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     private List<EmployeeProfile> employees;
+
+
 }

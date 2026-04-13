@@ -9,6 +9,7 @@ import com.cts.rivio.mapper.DesignationMapper;
 import com.cts.rivio.repository.DepartmentRepository;
 import com.cts.rivio.repository.DesignationRepository;
 import com.cts.rivio.service.DesignationService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +61,9 @@ public class DesignationServiceImpl implements DesignationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Designation", "id", id));
 
         // Update Title
-        designation.setTitle(request.getTitle());
+        if (request.getTitle() != null) {
+            designation.setTitle(request.getTitle());
+        }
 
         // Update Department if a new one is provided
         if (request.getDepartmentId() != null) {
@@ -70,5 +73,20 @@ public class DesignationServiceImpl implements DesignationService {
         }
 
         return designationMapper.toResponse(designationRepository.save(designation));
+    }
+
+    @Override
+    @Transactional
+    public void deleteDesignation(Integer id) {
+        Designation designation = designationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Designation", "id", id));
+
+        // Acceptance Criteria 1: Safe Delete Check
+        // Block deletion if any employee (active or past) is linked to this designation
+        if (designation.getEmployees() != null && !designation.getEmployees().isEmpty()) {
+            throw new IllegalArgumentException("Cannot delete designation: One or more employees are currently or were previously assigned to this title.");
+        }
+
+        designationRepository.delete(designation);
     }
 }

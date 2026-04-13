@@ -46,4 +46,7 @@ public class Location {
     @EqualsAndHashCode.Exclude
     @JsonIgnore
     private List<JobOpening> jobOpenings;
+
+
+
 }
