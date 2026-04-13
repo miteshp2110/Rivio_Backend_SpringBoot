@@ -37,4 +37,10 @@ public class DesignationController {
         DesignationResponse response = designationService.updateDesignation(id, request);
         return ResponseEntity.ok(ApiResponse.success(response, "Designation updated successfully"));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteDesignation(@PathVariable Integer id) {
+        designationService.deleteDesignation(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Designation deleted successfully"));
+    }
 }

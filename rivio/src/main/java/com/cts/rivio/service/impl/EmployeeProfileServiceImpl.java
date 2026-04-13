@@ -29,9 +29,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
-
-
 import java.time.LocalDate;
+import com.cts.rivio.dto.request.EmployeeBasicInfoRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -213,6 +212,26 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
         userRepository.save(user);
 
         // Save the profile and return the flattened DTO
+        profile = employeeRepository.save(profile);
+        return employeeMapper.toResponse(profile);
+    }
+    @Override
+    @Transactional
+    public EmployeeProfileResponse updateBasicInfo(Integer id, EmployeeBasicInfoRequest request) {
+        // Fetch the profile or throw 404
+        EmployeeProfile profile = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee Profile", "id", id));
+
+        // Acceptance Criteria 1 & 2: Update ONLY personal contact and financial fields
+        // By using the specific EmployeeBasicInfoRequest, we ignore salary, manager, etc.
+        if (request.getPhoneNo() != null) {
+            profile.setPhoneNo(request.getPhoneNo());
+        }
+
+        if (request.getBankAccount() != null) {
+            profile.setBankAccount(request.getBankAccount());
+        }
+
         profile = employeeRepository.save(profile);
         return employeeMapper.toResponse(profile);
     }

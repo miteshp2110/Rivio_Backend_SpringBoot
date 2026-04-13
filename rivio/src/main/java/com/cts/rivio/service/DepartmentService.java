@@ -8,4 +8,5 @@ public interface DepartmentService {
     DepartmentResponse createDepartment(DepartmentRequest request);
     List<DepartmentResponse> getAllDepartments();
     DepartmentResponse updateDepartment(Integer id, DepartmentRequest request);
+    void deleteDepartment(Integer id);
 }

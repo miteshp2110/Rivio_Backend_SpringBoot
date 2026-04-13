@@ -36,4 +36,10 @@ public class DepartmentController {
         DepartmentResponse response = departmentService.updateDepartment(id, request);
         return ResponseEntity.ok(ApiResponse.success(response, "Department updated successfully"));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteDepartment(@PathVariable Integer id) {
+        departmentService.deleteDepartment(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Department deleted successfully"));
+    }
 }

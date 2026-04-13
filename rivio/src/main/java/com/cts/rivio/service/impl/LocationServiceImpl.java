@@ -48,11 +48,10 @@ public class LocationServiceImpl implements LocationService {
         Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Location", "id", id));
 
-        location.setName(request.getName());
-        location.setTimezone(request.getTimezone());
-        if (request.getCurrencyCode() != null) {
-            location.setCurrencyCode(request.getCurrencyCode());
-        }
+        // AC 1: Update name, timezone, and currency code
+        if (request.getName() != null) location.setName(request.getName());
+        if (request.getTimezone() != null) location.setTimezone(request.getTimezone());
+        if (request.getCurrencyCode() != null) location.setCurrencyCode(request.getCurrencyCode());
 
         Location updatedLocation = locationRepository.save(location);
         return locationMapper.toResponse(updatedLocation);
@@ -63,9 +62,13 @@ public class LocationServiceImpl implements LocationService {
         Location location = locationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Location", "id", id));
 
-        // Acceptance Criteria: Cannot delete a location if employees are assigned to it
-        if (location.getEmployees() != null && !location.getEmployees().isEmpty()) {
-            throw new IllegalArgumentException("Cannot delete location: Employees are assigned to this location.");
+        // AC 2: Safe Delete - Block if linked to Employees OR Job Openings
+        boolean hasEmployees = location.getEmployees() != null && !location.getEmployees().isEmpty();
+        boolean hasJobOpenings = location.getJobOpenings() != null && !location.getJobOpenings().isEmpty();
+
+        if (hasEmployees || hasJobOpenings) {
+            // This triggers a 400 Bad Request by default in your GlobalExceptionHandler
+            throw new IllegalArgumentException("Conflict: Cannot delete location linked to active employees or job openings.");
         }
 
         locationRepository.delete(location);

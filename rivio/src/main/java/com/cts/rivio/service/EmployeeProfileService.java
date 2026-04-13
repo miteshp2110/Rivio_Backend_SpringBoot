@@ -1,5 +1,6 @@
 package com.cts.rivio.service;
 
+import com.cts.rivio.dto.request.EmployeeBasicInfoRequest;
 import com.cts.rivio.dto.request.EmployeeProfileRequest;
 import com.cts.rivio.dto.request.JobDetailsUpdateRequest;
 import com.cts.rivio.dto.request.EmployeeStatusUpdateRequest;
@@ -13,4 +14,5 @@ public interface EmployeeProfileService {
     Page<EmployeeDirectoryResponse> getEmployeeDirectory(String search, int page, int size);
     EmployeeProfileResponse updateJobDetails(Integer id, JobDetailsUpdateRequest request);
     EmployeeProfileResponse updateEmployeeStatus(Integer id, EmployeeStatusUpdateRequest request);
+    EmployeeProfileResponse updateBasicInfo(Integer id, EmployeeBasicInfoRequest request);
 }
