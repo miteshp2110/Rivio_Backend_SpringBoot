@@ -8,8 +8,13 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "pay_cycles")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PayCycle {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -24,9 +29,7 @@ public class PayCycle {
     private LocalDate toDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
+    @Builder.Default // FIX 1: Ensures the Builder pattern respects the default value
     private PayCycleStatus status = PayCycleStatus.DRAFT;
 }
-
-
-

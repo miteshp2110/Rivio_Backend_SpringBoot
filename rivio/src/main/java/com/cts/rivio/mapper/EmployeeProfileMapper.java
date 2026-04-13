@@ -6,7 +6,8 @@ import com.cts.rivio.entity.EmployeeProfile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+// FIX: Add the "uses" parameter here so MapStruct knows how to map the new salary list!
+@Mapper(componentModel = "spring", uses = {SalaryComponentMapper.class})
 public interface EmployeeProfileMapper {
 
     @Mapping(source = "user.email", target = "userEmail")
