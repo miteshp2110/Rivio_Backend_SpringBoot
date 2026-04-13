@@ -3,7 +3,9 @@ package com.cts.rivio.controller;
 import com.cts.rivio.core.common.dto.ApiResponse;
 import com.cts.rivio.dto.request.PayCycleRequest;
 import com.cts.rivio.dto.response.PayCycleResponse;
+import com.cts.rivio.dto.response.PaySlipResponse;
 import com.cts.rivio.service.PayCycleService;
+import com.cts.rivio.service.PayrollService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import java.util.List;
 public class PayCycleController {
 
     private final PayCycleService payCycleService;
+    private final PayrollService payrollService;
 
     /**
      * [PAY-42] Create a new Pay Cycle
@@ -33,5 +36,34 @@ public class PayCycleController {
 
         List<PayCycleResponse> responses = payCycleService.getAllPayCycles(name);
         return ResponseEntity.ok(ApiResponse.success(responses, "Pay cycles fetched successfully"));
+    }
+
+    @PostMapping("/{id}/generate-payslips")
+    public ResponseEntity<ApiResponse<List<PaySlipResponse>>> generatePayslips(@PathVariable Integer id) {
+        List<PaySlipResponse> generatedSlips = payrollService.generatePayslipsForCycle(id);
+        return ResponseEntity.ok(ApiResponse.success(
+                generatedSlips,
+                "Successfully generated " + generatedSlips.size() + " payslips. Pay Cycle is now in PROCESSING state."
+        ));
+    }
+
+    /**
+     * Get all generated payslips for a specific Pay Cycle
+     */
+    @GetMapping("/{id}/payslips")
+    public ResponseEntity<ApiResponse<List<PaySlipResponse>>> getPayslipsByPayCycle(@PathVariable Integer id) {
+        List<PaySlipResponse> responses = payrollService.getPayslipsByPayCycle(id);
+        return ResponseEntity.ok(ApiResponse.success(responses, "Payslips fetched successfully"));
+    }
+
+    /**
+     * Get a specific employee's payslip for a specific Pay Cycle
+     */
+    @GetMapping("/{id}/payslips/employee/{employeeId}")
+    public ResponseEntity<ApiResponse<PaySlipResponse>> getPayslipForEmployee(
+            @PathVariable Integer id,
+            @PathVariable Integer employeeId) {
+        PaySlipResponse response = payrollService.getPayslipByEmployeeAndPayCycle(id, employeeId);
+        return ResponseEntity.ok(ApiResponse.success(response, "Employee payslip fetched successfully"));
     }
 }

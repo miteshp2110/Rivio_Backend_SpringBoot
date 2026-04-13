@@ -11,4 +11,5 @@ public interface HolidayRepository extends JpaRepository<Holiday, Integer> {
 
     // AC 1: Fetch all holidays sorted chronologically
     List<Holiday> findAllByOrderByDateAsc();
+    List<Holiday> findByDateBetween(LocalDate startDate, LocalDate endDate);
 }

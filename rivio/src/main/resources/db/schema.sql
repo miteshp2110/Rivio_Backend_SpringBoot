@@ -133,6 +133,7 @@ CREATE TABLE payslips (
     gross_earnings DECIMAL(15,2) NOT NULL,
     total_deductions DECIMAL(15,2) NOT NULL,
     net_pay DECIMAL(15,2) NOT NULL,
+    status ENUM('DRAFT', 'GENERATED', 'PAID') DEFAULT 'DRAFT',
     UNIQUE KEY (pay_cycle_id, employee_profile_id)
 );
 
