@@ -2,18 +2,20 @@ package com.cts.rivio.service;
 
 import com.cts.rivio.dto.request.CandidateRequest;
 import com.cts.rivio.dto.request.JobOpeningRequest;
-import com.cts.rivio.dto.request.JobStatusUpdateRequest;
-import com.cts.rivio.entity.Candidate;
-import com.cts.rivio.entity.JobOpening;
+import com.cts.rivio.dto.response.CandidateDTO;
+import com.cts.rivio.dto.response.JobOpeningResponse;
 import com.cts.rivio.enums.CandidateStage;
+import com.cts.rivio.enums.JobStatus;
+
 import java.util.List;
 
 public interface JobOpeningService {
-    JobOpening createJobOpening(JobOpeningRequest request);
-    List<JobOpening> getAllJobOpenings();
-    JobOpening updateJobStatus(Long id, JobStatusUpdateRequest request);
-    Candidate addCandidate(Long jobOpeningId, CandidateRequest request);
+    JobOpeningResponse createJobOpening(JobOpeningRequest request);
+    List<JobOpeningResponse> getAllJobOpenings();
+    JobOpeningResponse updateStatus(Integer id, JobStatus newStatus);
+    void deleteJobOpening(Integer id);
 
-    // [ATS-37] New method to view candidates
-    List<Candidate> getCandidatesByJobId(Long jobOpeningId, CandidateStage stage);
+    CandidateDTO addCandidate(Integer jobOpeningId, CandidateRequest request);
+    List<CandidateDTO> getCandidatesByJobId(Integer jobOpeningId, CandidateStage stage);
+    JobOpeningResponse getJobOpeningById(Integer id);
 }
