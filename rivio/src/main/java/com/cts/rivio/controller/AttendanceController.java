@@ -31,7 +31,15 @@ public class AttendanceController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(ApiResponse.success(attendanceService.getOrganizationAttendance(date), "Attendance records fetched"));
     }
+    @GetMapping("/employee/{id}/history")
+    public ResponseEntity<ApiResponse<List<AttendanceResponse>>> getHistory(
+            @PathVariable Integer id,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
 
+        List<AttendanceResponse> history = attendanceService.getEmployeeAttendanceHistory(id, startDate, endDate);
+        return ResponseEntity.ok(ApiResponse.success(history, "History fetched successfully"));
+    }
     @PostMapping
     public ResponseEntity<ApiResponse<AttendanceResponse>> markAttendance(
             @Valid @RequestBody AttendanceRequest request,

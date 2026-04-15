@@ -14,7 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.cts.rivio.dto.request.EmployeeBasicInfoRequest;
-
+import java.time.LocalDate;
+import java.util.*;
 @RestController
 @RequestMapping("/employees")
 @RequiredArgsConstructor
@@ -35,7 +36,18 @@ public class EmployeeProfileController {
         EmployeeProfileResponse profile = employeeService.getProfileById(id);
         return ResponseEntity.ok(ApiResponse.success(profile, "Profile fetched successfully"));
     }
+    @GetMapping("/eligible-for-attendance")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getEligible(
+            @RequestParam(required = false) LocalDate date) {
 
+        // Default to today if the user doesn't provide a date in Postman
+        LocalDate targetDate = (date != null) ? date : LocalDate.now();
+
+        return ResponseEntity.ok(ApiResponse.success(
+                employeeService.getEligibleEmployees(targetDate),
+                "Eligible employees fetched"
+        ));
+    }
     @GetMapping
     public ResponseEntity<ApiResponse<Page<EmployeeDirectoryResponse>>> getEmployeeDirectory(
             @RequestParam(required = false) String search,

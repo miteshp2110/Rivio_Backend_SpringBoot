@@ -6,6 +6,9 @@ import com.cts.rivio.dto.request.JobDetailsUpdateRequest;
 import com.cts.rivio.dto.request.EmployeeStatusUpdateRequest;
 import com.cts.rivio.dto.response.EmployeeDirectoryResponse;
 import com.cts.rivio.dto.response.EmployeeProfileResponse;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 
 public interface EmployeeProfileService {
@@ -15,4 +18,5 @@ public interface EmployeeProfileService {
     EmployeeProfileResponse updateJobDetails(Integer id, JobDetailsUpdateRequest request);
     EmployeeProfileResponse updateEmployeeStatus(Integer id, EmployeeStatusUpdateRequest request);
     EmployeeProfileResponse updateBasicInfo(Integer id, EmployeeBasicInfoRequest request);
+    List<Map<String, Object>> getEligibleEmployees(LocalDate date);
 }

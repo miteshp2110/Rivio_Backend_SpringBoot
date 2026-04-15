@@ -32,6 +32,12 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import com.cts.rivio.dto.request.EmployeeBasicInfoRequest;
 
+// Added missing utility imports
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class EmployeeProfileServiceImpl implements EmployeeProfileService {
@@ -47,8 +53,6 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
     @Override
     @Transactional
     public EmployeeProfileResponse createProfile(EmployeeProfileRequest request) {
-
-        // AC 1: Validate Unique Constraints
         if (employeeRepository.existsByEmployeeCode(request.getEmployeeCode())) {
             throw new IllegalArgumentException("Employee Code '" + request.getEmployeeCode() + "' is already in use.");
         }
@@ -56,7 +60,6 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
             throw new IllegalArgumentException("User ID " + request.getUserId() + " is already linked to a profile.");
         }
 
-        // AC 2: Validate ALL Foreign Keys
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getUserId()));
 
@@ -69,14 +72,12 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
         Location loc = locationRepository.findById(request.getLocationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Location", "id", request.getLocationId()));
 
-        // Validate Manager (if provided)
         EmployeeProfile manager = null;
         if (request.getReportsToProfileId() != null) {
             manager = employeeRepository.findById(request.getReportsToProfileId())
                     .orElseThrow(() -> new ResourceNotFoundException("Manager Profile", "id", request.getReportsToProfileId()));
         }
 
-        // Build Entity
         EmployeeProfile profile = EmployeeProfile.builder()
                 .user(user)
                 .employeeCode(request.getEmployeeCode())
@@ -88,31 +89,37 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
                 .manager(manager)
                 .joiningDate(request.getJoiningDate())
                 .employmentType(request.getEmploymentType() != null ? request.getEmploymentType() : EmploymentType.FULL_TIME)
-                .status(EmployeeStatus.ACTIVE) // AC 3: Default status is Active
+                .status(EmployeeStatus.ACTIVE)
                 .build();
 
-        // Save and map to response
         profile = employeeRepository.save(profile);
         return employeeMapper.toResponse(profile);
     }
 
+    // [NEW] Logic for Manual Attendance Dropdown
+    @Override
+    public List<Map<String, Object>> getEligibleEmployees(LocalDate date) {
+        return employeeRepository.findEmployeesEligibleForAttendance(date)
+                .stream()
+                .map(emp -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", emp.getId());
+                    map.put("name", emp.getFirstName() + " " + emp.getLastName());
+                    return map;
+                })
+                .collect(Collectors.toList());
+    }
+
     @Override
     public EmployeeProfileResponse getProfileById(Integer id) {
-
-        // AC 1: Returns 404 if not found (Handled by GlobalExceptionHandler)
         EmployeeProfile profile = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee Profile", "id", id));
-
         return employeeMapper.toResponse(profile);
     }
 
     @Override
     public Page<EmployeeDirectoryResponse> getEmployeeDirectory(String search, int page, int size) {
-
-        // AC 2: Must be paginated (sorted by first name alphabetically)
         Pageable pageable = PageRequest.of(page, size, Sort.by("firstName").ascending());
-
-        // AC 1: Fetch active employees and apply optional search filter
         Page<EmployeeProfile> profilePage = employeeRepository.searchActiveEmployees(
                 search,
                 EmployeeStatus.ACTIVE,
@@ -124,12 +131,8 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
     @Override
     @Transactional
     public EmployeeProfileResponse updateJobDetails(Integer id, JobDetailsUpdateRequest request) {
-
         EmployeeProfile profile = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee Profile", "id", id));
-
-
-        // --- 2. AC 1: Validate & Apply New FKs ONLY if they were provided in the request ---
 
         if (request.getDepartmentId() != null) {
             Department newDept = departmentRepository.findById(request.getDepartmentId())
@@ -150,12 +153,9 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
         }
 
         if (request.getReportsToProfileId() != null) {
-            // Prevent circular reporting (an employee cannot be their own manager)
             if (request.getReportsToProfileId().equals(id)) {
                 throw new IllegalArgumentException("An employee cannot report to themselves.");
             }
-
-            // Special case: Allow passing '0' or '-1' if HR explicitly wants to REMOVE a manager
             if (request.getReportsToProfileId() == 0 || request.getReportsToProfileId() == -1) {
                 profile.setManager(null);
             } else {
@@ -165,69 +165,49 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
             }
         }
 
-        // Save the updated profile
         profile = employeeRepository.save(profile);
-
-
-
         return employeeMapper.toResponse(profile);
     }
 
-
     @Override
-    @Transactional // AC 2: Ensures BOTH the profile and the user account update together, or roll back if one fails.
+    @Transactional
     public EmployeeProfileResponse updateEmployeeStatus(Integer id, EmployeeStatusUpdateRequest request) {
-
         EmployeeProfile profile = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee Profile", "id", id));
 
-        // --- 1. Validate Exit Date (AC 1) ---
         if (request.getExitDate() != null) {
             if (request.getExitDate().isBefore(LocalDate.now()) && !request.isOverridePastDate()) {
                 throw new IllegalArgumentException("Exit date cannot be in the past. To backdate, you must set 'overridePastDate' to true.");
             }
             profile.setExitDate(request.getExitDate());
         } else if (request.getStatus() == EmployeeStatus.TERMINATED) {
-            // Enforce that a terminated employee MUST have an exit date
             throw new IllegalArgumentException("An exit date must be provided when terminating an employee.");
         }
 
-        // --- 2. Update Profile Status ---
         profile.setStatus(request.getStatus());
-
-        // --- 3. Manage Application Login Access (AC 2) ---
         User user = profile.getUser();
 
         if (request.getStatus() == EmployeeStatus.TERMINATED) {
-            // Suspend credentials immediately so they cannot log in
             user.setStatus(UserStatus.SUSPENDED);
-
         } else if (request.getStatus() == EmployeeStatus.ACTIVE && user.getStatus() == UserStatus.SUSPENDED) {
-            // If HR made a mistake and reactivates them, restore their login access
             user.setStatus(UserStatus.ACTIVE);
-            profile.setExitDate(null); // Clear the exit date
+            profile.setExitDate(null);
         }
 
-        // Save the user (Hibernate will track this, but explicitly saving is good practice)
         userRepository.save(user);
-
-        // Save the profile and return the flattened DTO
         profile = employeeRepository.save(profile);
         return employeeMapper.toResponse(profile);
     }
+
     @Override
     @Transactional
     public EmployeeProfileResponse updateBasicInfo(Integer id, EmployeeBasicInfoRequest request) {
-        // Fetch the profile or throw 404
         EmployeeProfile profile = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee Profile", "id", id));
 
-        // Acceptance Criteria 1 & 2: Update ONLY personal contact and financial fields
-        // By using the specific EmployeeBasicInfoRequest, we ignore salary, manager, etc.
         if (request.getPhoneNo() != null) {
             profile.setPhoneNo(request.getPhoneNo());
         }
-
         if (request.getBankAccount() != null) {
             profile.setBankAccount(request.getBankAccount());
         }
