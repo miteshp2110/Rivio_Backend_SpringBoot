@@ -11,11 +11,12 @@ import java.util.List;
 
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Integer> {
 
-    // FIX: Explicitly tell Spring how to find the manager via the employee relationship
     @Query("SELECT lr FROM LeaveRequest lr WHERE lr.employee.manager.id = :managerId AND lr.status = :status")
     List<LeaveRequest> findByManagerIdAndStatus(@Param("managerId") Integer managerId, @Param("status") LeaveStatus status);
 
-    // Existing ATTN-33 method
     @Query("SELECT COUNT(l) > 0 FROM LeaveRequest l WHERE l.employee.id = :empId AND l.status = 'APPROVED' AND :targetDate BETWEEN l.startDate AND l.endDate")
     boolean hasApprovedLeaveOnDate(@Param("empId") Integer empId, @Param("targetDate") LocalDate targetDate);
+
+    // [NEW] Fetch all leave requests for a specific employee in chronological order (newest first)
+    List<LeaveRequest> findByEmployeeIdOrderByStartDateDesc(Integer employeeId);
 }

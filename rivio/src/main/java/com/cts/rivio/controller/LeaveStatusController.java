@@ -10,20 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/leave-requests")
+@RequestMapping("/leave-status-updates") // Path is now unique
 public class LeaveStatusController {
 
     @Autowired
     private LeaveRequestStatusService statusService;
 
-    @PutMapping("/{id}/status")
+    @PutMapping("/{id}") // Final URL: PUT /api/leave-status-updates/{id}
     public ResponseEntity<ApiResponse<LeaveRequestResponse>> updateLeaveStatus(
             @PathVariable Integer id,
             @Valid @RequestBody LeaveStatusUpdateRequest requestBody,
             @RequestHeader(value = "X-Manager-Id", defaultValue = "1") Integer managerId) {
 
         LeaveRequestResponse updated = statusService.updateStatus(id, requestBody.getStatus(), managerId);
-
-        return ResponseEntity.ok(ApiResponse.success(updated, "Leave request status updated to " + requestBody.getStatus()));
+        return ResponseEntity.ok(ApiResponse.success(updated, "Status updated successfully"));
     }
 }
