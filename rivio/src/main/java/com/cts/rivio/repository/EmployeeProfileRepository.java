@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -29,4 +30,20 @@ public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile
     Page<EmployeeProfile> searchActiveEmployees(@Param("search") String search,
                                                 @Param("status") EmployeeStatus status,
                                                 Pageable pageable);
+
+    /**
+     * Logic for Manual Attendance Dropdown:
+     * Finds employees who are NOT Terminated AND do NOT have an approved leave on the selected date.
+     */
+    @Query("SELECT e FROM EmployeeProfile e WHERE e.status <> com.cts.rivio.enums.EmployeeStatus.TERMINATED " +
+            "AND NOT EXISTS (SELECT lr FROM LeaveRequest lr WHERE lr.employee.id = e.id " +
+            "AND lr.status = com.cts.rivio.enums.LeaveStatus.APPROVED " +
+            "AND :date BETWEEN lr.startDate AND lr.endDate)")
+    List<EmployeeProfile> findEmployeesEligibleForAttendance(@Param("date") LocalDate date);
 }
+//    @Query("SELECT e FROM EmployeeProfile e WHERE e.status <> com.cts.rivio.enums.EmployeeStatus.TERMINATED " +
+//            "AND NOT EXISTS (SELECT lr FROM LeaveRequest lr WHERE lr.employee.id = e.id " +
+//            "AND lr.status = com.cts.rivio.enums.LeaveStatus.APPROVED " +
+//            "AND :date BETWEEN lr.startDate AND lr.endDate)")
+//    List<EmployeeProfile> findEmployeesEligibleForAttendance(@Param("date") LocalDate date);
+//}
