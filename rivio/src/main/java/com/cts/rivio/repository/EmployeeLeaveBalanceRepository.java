@@ -26,6 +26,8 @@ public interface EmployeeLeaveBalanceRepository extends JpaRepository<EmployeeLe
             Integer year
     );
 
+    boolean existsByLeaveTypeId(Integer leaveTypeId);
+
     /**
      * [LEAV-21] Quick check to see if any balances exist for an employee in a given year.
      */

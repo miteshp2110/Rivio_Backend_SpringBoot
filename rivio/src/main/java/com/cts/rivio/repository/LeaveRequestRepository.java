@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Integer> {
 
+    boolean existsByLeaveTypeId(Integer leaveTypeId);
     // FIX: Explicitly tell Spring how to find the manager via the employee relationship
     @Query("SELECT lr FROM LeaveRequest lr WHERE lr.employee.manager.id = :managerId AND lr.status = :status")
     List<LeaveRequest> findByManagerIdAndStatus(@Param("managerId") Integer managerId, @Param("status") LeaveStatus status);
