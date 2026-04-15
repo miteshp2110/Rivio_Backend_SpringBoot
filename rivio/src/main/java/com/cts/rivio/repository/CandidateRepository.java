@@ -9,11 +9,13 @@ import java.util.List;
 @Repository
 public interface CandidateRepository extends JpaRepository<Candidate, Long> {
     // AC: Candidate email must be unique per job opening
-    boolean existsByEmailAndJobOpeningId(String email, Long jobOpeningId);
+    boolean existsByEmailAndJobOpeningId(String email, Integer jobOpeningId);
 
     // [ATS-37] Fetch candidates by Job ID
-    List<Candidate> findByJobOpeningId(Long jobOpeningId);
+    List<Candidate> findByJobOpeningId(Integer jobOpeningId);
+
+    boolean existsByJobOpeningId(Integer jobOpeningId);
 
     // [ATS-37] Fetch candidates by Job ID and Filter by Stage
-    List<Candidate> findByJobOpeningIdAndStage(Long jobOpeningId, CandidateStage stage);
+    List<Candidate> findByJobOpeningIdAndStage(Integer jobOpeningId, CandidateStage stage);
 }

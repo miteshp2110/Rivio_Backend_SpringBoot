@@ -14,4 +14,7 @@ public interface AttendanceService {
     AttendanceResponse updatePunchOut(Long id, PunchOutRequest request);
     List<AttendanceResponse> getOrganizationAttendance(LocalDate date);
     BulkUploadResponse processBulkUpload(MultipartFile file);
+
+    // [NEW] Added for ATTN-13
+    List<AttendanceResponse> getEmployeeAttendanceHistory(Integer employeeId, LocalDate startDate, LocalDate endDate);
 }

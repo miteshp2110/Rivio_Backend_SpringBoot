@@ -1,8 +1,11 @@
 package com.cts.rivio.service.impl;
 
+import com.cts.rivio.core.exception.ResourceNotFoundException;
 import com.cts.rivio.dto.request.StageUpdateRequest;
+import com.cts.rivio.dto.response.CandidateDTO;
 import com.cts.rivio.entity.Candidate;
 import com.cts.rivio.enums.CandidateStage;
+import com.cts.rivio.mapper.CandidateMapper;
 import com.cts.rivio.repository.CandidateRepository;
 import com.cts.rivio.service.CandidateService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import java.util.*;
 public class CandidateServiceImpl implements CandidateService {
 
     private final CandidateRepository candidateRepository;
+    private final CandidateMapper candidateMapper;
 
     @Override
     public Candidate updateCandidateStage(Long id, StageUpdateRequest request) {
@@ -44,6 +48,14 @@ public class CandidateServiceImpl implements CandidateService {
         response.put("email", candidate.getEmail());
 
         return response;
+    }
+
+    @Override
+    public CandidateDTO getCandidateById(Integer id) {
+        Candidate candidate = candidateRepository.findById(Long.valueOf(id))
+                .orElseThrow(() -> new ResourceNotFoundException("Candidate", "id", id));
+
+        return candidateMapper.toDto(candidate);
     }
 
 

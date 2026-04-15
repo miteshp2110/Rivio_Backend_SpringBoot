@@ -134,7 +134,15 @@ public class AttendanceServiceImpl implements AttendanceService {
         List<Attendance> records = (date != null) ? attendanceRepository.findByDate(date) : attendanceRepository.findAll();
         return records.stream().map(attendanceMapper::toResponse).collect(Collectors.toList());
     }
-
+    @Override
+    public List<AttendanceResponse> getEmployeeAttendanceHistory(Integer employeeId, LocalDate startDate, LocalDate endDate) {
+        // 1. Fetch the records from the repository
+        return attendanceRepository.findByEmployeeProfileIdAndDateBetweenOrderByDateDesc(employeeId, startDate, endDate)
+                .stream()
+                // 2. Map each entity to a DTO (using your mapper)
+                .map(attendanceMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional

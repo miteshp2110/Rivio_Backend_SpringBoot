@@ -8,6 +8,6 @@ import lombok.Data;
 public class UserResponse {
     private Integer id;
     private String email;
-    private String roleName;
-    private String status;
+    private String roleName; // Flattened from Role entity
+    private String status;   // ACTIVE / SUSPENDED
 }
