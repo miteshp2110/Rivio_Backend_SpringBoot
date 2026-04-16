@@ -12,4 +12,6 @@ public class AuthResponse {
     private Integer userId;
     private String role;
     private List<String> permissions;
+    private Integer employeeProfileId;
+    private String name;
 }

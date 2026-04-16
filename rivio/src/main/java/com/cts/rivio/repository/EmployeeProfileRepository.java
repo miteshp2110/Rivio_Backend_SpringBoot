@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile, Integer> {
@@ -40,6 +41,8 @@ public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile
             "AND lr.status = com.cts.rivio.enums.LeaveStatus.APPROVED " +
             "AND :date BETWEEN lr.startDate AND lr.endDate)")
     List<EmployeeProfile> findEmployeesEligibleForAttendance(@Param("date") LocalDate date);
+
+    Optional<EmployeeProfile> findByUserId(Integer userId);
 }
 //    @Query("SELECT e FROM EmployeeProfile e WHERE e.status <> com.cts.rivio.enums.EmployeeStatus.TERMINATED " +
 //            "AND NOT EXISTS (SELECT lr FROM LeaveRequest lr WHERE lr.employee.id = e.id " +
