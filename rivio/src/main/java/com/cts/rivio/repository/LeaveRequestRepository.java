@@ -12,8 +12,14 @@ import java.util.List;
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Integer> {
 
     boolean existsByLeaveTypeId(Integer leaveTypeId);
-    @Query("SELECT lr FROM LeaveRequest lr WHERE lr.employee.manager.id = :managerId AND lr.status = :status")
-    List<LeaveRequest> findByManagerIdAndStatus(@Param("managerId") Integer managerId, @Param("status") LeaveStatus status);
+    @Query("SELECT lr FROM LeaveRequest lr " +
+            "JOIN FETCH lr.employee ep " +
+            "JOIN FETCH lr.leaveType lt " +
+            "WHERE lr.status = :status AND ep.manager.id = :managerId")
+    List<LeaveRequest> findByStatusAndManagerId(
+            @Param("status") LeaveStatus status,
+            @Param("managerId") Integer managerId
+    );
 
     @Query("SELECT COUNT(l) > 0 FROM LeaveRequest l WHERE l.employee.id = :empId AND l.status = 'APPROVED' AND :targetDate BETWEEN l.startDate AND l.endDate")
     boolean hasApprovedLeaveOnDate(@Param("empId") Integer empId, @Param("targetDate") LocalDate targetDate);

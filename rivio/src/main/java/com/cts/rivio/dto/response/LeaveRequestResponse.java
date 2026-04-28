@@ -36,3 +36,31 @@ public class LeaveRequestResponse {
     // [NEW] Added for the HR Admin Auditing feature
     private Integer approvedByProfileId;
 }
+
+//package com.cts.rivio.dto.response;
+//
+//import com.cts.rivio.enums.LeaveStatus;
+//import lombok.Builder;
+//import lombok.Data;
+//
+//import java.time.LocalDate;
+//
+//@Data
+//@Builder
+//public class LeaveRequestResponse {
+//    private Integer id;
+//
+//    // Employee Details
+//    private Integer employeeProfileId;
+//    private String employeeName;
+//    private String employeeCode;
+//
+//    // Leave Details
+//    private Integer leaveTypeId;
+//    private String leaveTypeName;
+//    private LocalDate startDate;
+//    private LocalDate endDate;
+//    private Double daysRequested;
+//    private String reason;
+//    private LeaveStatus status;
+//}

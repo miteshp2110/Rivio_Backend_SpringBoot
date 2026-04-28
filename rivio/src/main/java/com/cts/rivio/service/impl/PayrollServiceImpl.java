@@ -37,6 +37,15 @@ public class PayrollServiceImpl implements PayrollService {
     private final AttendanceRepository attendanceRepository;
     private final PaySlipRepository paySlipRepository;
     private final PaySlipMapper paySlipMapper;
+    @Override
+    public List<PaySlipResponse> getPayslipsByEmployeeId(Integer employeeId) {
+
+        // Fetch payslips and map them to clean DTOs
+        return paySlipRepository.findByEmployeeProfileId(employeeId)
+                .stream()
+                .map(paySlipMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional

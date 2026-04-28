@@ -82,4 +82,11 @@ public class SalaryComponentServiceImpl implements SalaryComponentService {
         // your GlobalExceptionHandler will catch the DataIntegrityViolationException.
         salaryComponentRepository.delete(component);
     }
+    @Override
+    public List<SalaryComponentResponse> getAllComponents() {
+        return salaryComponentRepository.findAll()
+                .stream()
+                .map(salaryComponentMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 }
