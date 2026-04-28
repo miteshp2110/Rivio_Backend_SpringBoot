@@ -24,11 +24,17 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     @Autowired private EmployeeLeaveBalanceRepository balanceRepository;
     @Autowired private LeaveRequestMapper mapper;
 
+
     @Override
-    public List<LeaveRequestResponse> getManagerPendingRequests(Integer managerId, LeaveStatus status) {
-        LeaveStatus filterStatus = (status != null) ? status : LeaveStatus.PENDING;
-        return leaveRequestRepository.findByManagerIdAndStatus(managerId, filterStatus)
-                .stream().map(mapper::toResponse).collect(Collectors.toList());
+    public List<LeaveRequestResponse> getPendingRequestsForManager(Integer managerId) {
+        // Fetch only PENDING requests for employees reporting to this manager
+        List<LeaveRequest> pendingRequests = leaveRequestRepository
+                .findByStatusAndManagerId(LeaveStatus.PENDING, managerId);
+
+        // Map the entities to our detailed DTOs
+        return pendingRequests.stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

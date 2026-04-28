@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface LeaveRequestService {
     // For Managers to see team requests
-    List<LeaveRequestResponse> getManagerPendingRequests(Integer managerId, LeaveStatus status);
+    List<LeaveRequestResponse> getPendingRequestsForManager(Integer managerId);
+
 
     // For Managers to Approve/Reject
     LeaveRequestResponse updateLeaveStatus(Integer requestId, LeaveStatus newStatus, Integer managerId);

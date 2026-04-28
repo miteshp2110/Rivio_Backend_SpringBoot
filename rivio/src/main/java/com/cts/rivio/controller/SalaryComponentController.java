@@ -19,6 +19,12 @@ public class SalaryComponentController {
 
     private final SalaryComponentService salaryComponentService;
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<SalaryComponentResponse>>> getAllComponents() {
+        List<SalaryComponentResponse> responses = salaryComponentService.getAllComponents();
+        return ResponseEntity.ok(ApiResponse.success(responses, "All salary components fetched successfully"));
+    }
+
     // GET all components for a specific employee
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<ApiResponse<List<SalaryComponentResponse>>> getComponentsByEmployee(@PathVariable Integer employeeId) {

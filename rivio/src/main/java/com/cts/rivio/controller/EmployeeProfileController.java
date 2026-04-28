@@ -6,7 +6,9 @@ import com.cts.rivio.dto.request.EmployeeStatusUpdateRequest;
 import com.cts.rivio.dto.request.JobDetailsUpdateRequest;
 import com.cts.rivio.dto.response.EmployeeDirectoryResponse;
 import com.cts.rivio.dto.response.EmployeeProfileResponse;
+import com.cts.rivio.dto.response.PaySlipResponse;
 import com.cts.rivio.service.EmployeeProfileService;
+import com.cts.rivio.service.PayrollService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,7 @@ import java.util.*;
 public class EmployeeProfileController {
 
     private final EmployeeProfileService employeeService;
+    private final PayrollService payrollService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<EmployeeProfileResponse>> onboardEmployee(@Valid @RequestBody EmployeeProfileRequest request) {
@@ -84,6 +87,13 @@ public class EmployeeProfileController {
         // This will now resolve correctly
         EmployeeProfileResponse updatedProfile = employeeService.updateBasicInfo(id, request);
         return ResponseEntity.ok(ApiResponse.success(updatedProfile, "Personal details updated successfully"));
+    }
+    @GetMapping("/{id}/payslips")
+    public ResponseEntity<ApiResponse<List<PaySlipResponse>>> getEmployeePayslips(@PathVariable Integer id) {
+
+        List<PaySlipResponse> responses = payrollService.getPayslipsByEmployeeId(id);
+
+        return ResponseEntity.ok(ApiResponse.success(responses, "Personal payslips fetched successfully"));
     }
 
 }

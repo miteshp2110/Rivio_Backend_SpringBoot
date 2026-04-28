@@ -10,4 +10,5 @@ public interface SalaryComponentService {
     SalaryComponentResponse addComponent(Integer employeeId, SalaryComponentRequest request);
     SalaryComponentResponse updateComponent(Integer id, SalaryComponentRequest request);
     void deleteComponent(Integer id);
+    List<SalaryComponentResponse> getAllComponents();
 }

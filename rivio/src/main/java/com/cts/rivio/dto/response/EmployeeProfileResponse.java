@@ -13,6 +13,7 @@ public class EmployeeProfileResponse {
     private String firstName;
     private String lastName;
     private String userEmail;
+    private Integer userId;
     private String departmentName;
     private String designationTitle;
     private String locationName;
