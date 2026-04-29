@@ -21,4 +21,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     List<Attendance> findByEmployeeProfileIdAndDateBetweenOrderByDateDesc(
             Integer employeeId, LocalDate startDate, LocalDate endDate
     );
+
+    // Add these to calculate daily attendance rates
+    long countByDateAndStatus(java.time.LocalDate date, com.cts.rivio.enums.AttendanceStatus status);
+    List<com.cts.rivio.entity.Attendance> findByDateBetween(java.time.LocalDate startDate, java.time.LocalDate endDate);
 }

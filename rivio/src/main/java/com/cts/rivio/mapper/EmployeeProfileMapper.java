@@ -18,8 +18,12 @@ public interface EmployeeProfileMapper {
     @Mapping(target = "managerName", expression = "java(profile.getManager() != null ? profile.getManager().getFirstName() + ' ' + profile.getManager().getLastName() : null)")
     EmployeeProfileResponse toResponse(EmployeeProfile profile);
 
-    @Mapping(source = "user.email", target = "email")
     @Mapping(source = "department.name", target = "departmentName")
     @Mapping(source = "designation.title", target = "designationTitle")
-    EmployeeDirectoryResponse toDirectoryResponse(EmployeeProfile profile);
+    @Mapping(source = "user.email", target = "email") // Pulls email from the User entity
+
+    // NEW: Tell MapStruct to dig into the User -> Role -> Name
+    @Mapping(source = "user.role.name", target = "roleName")
+
+    EmployeeDirectoryResponse toDirectoryResponse(EmployeeProfile entity);
 }

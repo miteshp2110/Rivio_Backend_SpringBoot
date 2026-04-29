@@ -233,3 +233,32 @@ ALTER TABLE candidates
 ALTER TABLE attendance
     ADD FOREIGN KEY (employee_profile_id) REFERENCES employee_profiles(id) ON DELETE CASCADE,
     ADD FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+
+
+DELIMITER //
+
+CREATE TRIGGER after_employee_profile_insert
+AFTER INSERT ON employee_profiles
+FOR EACH ROW
+BEGIN
+    -- Automatically insert a leave balance record for every existing leave type
+    -- The year is dynamically set to the current calendar year
+    -- The allotted amount is pulled directly from the leave_types table
+    INSERT INTO employee_leave_balances (
+        employee_profile_id,
+        leave_type_id,
+        year,
+        allotted,
+        consumed
+    )
+    SELECT
+        NEW.id,               -- The ID of the newly created employee
+        id,                   -- The ID of the leave type
+        YEAR(CURRENT_DATE()), -- The current year (e.g., 2026)
+        yearly_allotment,     -- The default allotment for this leave type
+        0.00                  -- Initial consumed amount is zero
+    FROM leave_types;
+END //
+
+DELIMITER ;

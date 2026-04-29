@@ -93,4 +93,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
         leaveRequestRepository.delete(request);
     }
+
+    @Override
+    public List<LeaveRequestResponse> getPendingRequests(){
+        List<LeaveRequest> pendingRequests = leaveRequestRepository.findAll();
+        return pendingRequests.stream().map(mapper::toResponse).collect(Collectors.toList());
+    }
 }

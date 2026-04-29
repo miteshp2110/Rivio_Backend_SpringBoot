@@ -17,6 +17,9 @@ import java.util.Optional;
 public interface EmployeeProfileRepository extends JpaRepository<EmployeeProfile, Integer> {
 
     // AC 1: Ensure Employee Code is unique
+
+    // Add this to count new hires
+    long countByJoiningDateBetween(java.time.LocalDate startDate, java.time.LocalDate endDate);
     boolean existsByEmployeeCode(String employeeCode);
 
     // Ensure the User isn't already linked to another profile
