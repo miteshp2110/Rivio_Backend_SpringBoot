@@ -20,4 +20,7 @@ public interface PayCycleRepository extends JpaRepository<PayCycle, Integer> {
     // --- NEW SIMPLE SEARCH METHOD ---
     // Spring automatically writes the SQL: SELECT * WHERE cycle_name LIKE %?%
     List<PayCycle> findByCycleNameContainingIgnoreCase(String cycleName);
+
+    // Add this to count active payroll runs
+    long countByStatusIn(java.util.List<com.cts.rivio.enums.PayCycleStatus> statuses);
 }

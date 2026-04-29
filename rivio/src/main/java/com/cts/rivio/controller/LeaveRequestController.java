@@ -27,6 +27,13 @@ public class LeaveRequestController {
 
         return ResponseEntity.ok(ApiResponse.success(responses, "Pending team leave requests fetched successfully"));
     }
+    @GetMapping("/pending")
+    public ResponseEntity<ApiResponse<List<LeaveRequestResponse>>> getPendingRequests() {
+
+        List<LeaveRequestResponse> responses = leaveRequestService.getPendingRequests();
+
+        return ResponseEntity.ok(ApiResponse.success(responses, "Pending leave requests fetched successfully"));
+    }
     // 1. Submit a request
     @PostMapping
     public ResponseEntity<ApiResponse<LeaveRequestResponse>> submit(@Valid @RequestBody LeaveRequestPayload payload) {

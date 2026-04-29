@@ -9,7 +9,7 @@ public interface LeaveRequestService {
     // For Managers to see team requests
     List<LeaveRequestResponse> getPendingRequestsForManager(Integer managerId);
 
-
+    List<LeaveRequestResponse> getPendingRequests();
     // For Managers to Approve/Reject
     LeaveRequestResponse updateLeaveStatus(Integer requestId, LeaveStatus newStatus, Integer managerId);
 
