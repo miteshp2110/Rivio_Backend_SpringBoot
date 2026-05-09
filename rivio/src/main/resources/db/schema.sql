@@ -262,3 +262,34 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+
+-- 1. Create a view that exposes User data WITHOUT passwords
+CREATE VIEW vw_safe_users AS
+SELECT id, email, role_id, status, created_at FROM users;
+
+-- 2. Create the Read-Only Bot User
+CREATE USER 'rivio_bot'@'%' IDENTIFIED BY 'thisisforrivi';
+
+-- 3. Grant SELECT access ONLY to safe tables and views
+GRANT SELECT ON rivio.departments TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.designations TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.employee_profiles TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.leave_requests TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.employee_leave_balances TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.attendance TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.salary_components TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.job_openings TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.vw_safe_users TO 'rivio_bot'@'%'; -- Grant view, NOT the users table!
+GRANT SELECT ON rivio.locations TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.holidays TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.work_days TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.candidates TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.pay_cycles TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.payslips TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.leave_types TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.roles TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.permissions TO 'rivio_bot'@'%';
+GRANT SELECT ON rivio.role_permissions TO 'rivio_bot'@'%';
+FLUSH PRIVILEGES;
